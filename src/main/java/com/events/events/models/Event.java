@@ -2,6 +2,7 @@ package com.events.events.models;
 
 import javax.persistence.*;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -26,13 +27,16 @@ public class Event {
     @ManyToMany(mappedBy = "attending")
     private List<User> participants;
 
-    public Event(){}
+    public Event(){
+        this.participants = new ArrayList<>();
+    }
 
     public Event(String title, String location, Date date, User creator) {
         this.title = title;
         this.location = location;
         this.date = date;
         this.creator = creator;
+        this.participants = new ArrayList<>();
     }
 
     public Event(String title, String location, URL link, Date date, User creator) {
@@ -41,6 +45,7 @@ public class Event {
         this.link = link;
         this.date = date;
         this.creator = creator;
+        this.participants = new ArrayList<>();
     }
 
     public Event(String title, String location, URL link, Date date, User creator, List<User> participants) {

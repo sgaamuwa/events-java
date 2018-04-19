@@ -5,7 +5,6 @@ import com.events.events.repository.UserRepository;
 import com.events.events.services.UserService;
 import com.events.events.services.UserServiceImpl;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mindrot.jbcrypt.BCrypt;

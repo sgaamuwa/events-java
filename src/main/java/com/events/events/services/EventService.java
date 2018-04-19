@@ -12,5 +12,7 @@ public interface EventService {
     void deleteEvent(Event event);
     List<Event> listEventsByUser(User user);
     List<Event> listEventsUserIsAttending(User user);
+    Event addMultipleParticipantsToEvent(int eventId, int[] participants);
+    Event addSingleParticipantToEvent(int eventId, int userId);
 
 }
