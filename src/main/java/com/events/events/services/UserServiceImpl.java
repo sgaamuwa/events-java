@@ -2,6 +2,7 @@ package com.events.events.services;
 
 import com.events.events.models.User;
 import com.events.events.repository.UserRepository;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +18,14 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public User saveUser(User user){
+        user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
         return userRepository.save(user);
     }
 
     @Override
     @Transactional
     public User getUserById(int id) {
-        return userRepository.getOne(new Integer(id).toString());
+        return userRepository.getOne(new Integer(id));
     }
 
     @Override
