@@ -28,6 +28,13 @@ public class Event {
 
     public Event(){}
 
+    public Event(String title, String location, Date date, User creator) {
+        this.title = title;
+        this.location = location;
+        this.date = date;
+        this.creator = creator;
+    }
+
     public Event(String title, String location, URL link, Date date, User creator) {
         this.title = title;
         this.location = location;
