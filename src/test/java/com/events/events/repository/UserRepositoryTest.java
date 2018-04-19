@@ -27,9 +27,9 @@ public class UserRepositoryTest {
         entityManager.persist(samuel);
         entityManager.flush();
 
-//        Optional<User> returnedUser = userRepository.findById("1");
-//
-//        Assert.assertEquals("samuel", returnedUser.);
+        Optional<User> returnedUser = userRepository.findById(new Integer(1));
+
+        Assert.assertEquals("samuel", returnedUser.get().getFirstName());
 
     }
 }
