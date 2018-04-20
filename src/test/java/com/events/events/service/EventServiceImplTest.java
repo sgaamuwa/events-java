@@ -1,5 +1,6 @@
 package com.events.events.service;
 
+import com.events.events.error.NotFoundException;
 import com.events.events.models.Event;
 import com.events.events.models.User;
 import com.events.events.repository.EventRepository;
@@ -50,6 +51,8 @@ public class EventServiceImplTest {
         Event cinemaMovie = new Event("Movie", "Acacia Mall", new Date(), samuel);
         Mockito.when(userRepository.findById(new Integer(1))).thenReturn(Optional.of(male));
         Mockito.when(eventRepository.findById(new Integer(1))).thenReturn(Optional.of(cinemaMovie));
+        Mockito.when(userRepository.findById(new Integer(23))).thenReturn(Optional.empty());
+        Mockito.when(eventRepository.findById(new Integer(12))).thenReturn(Optional.empty());
     }
 
     @Test
@@ -64,5 +67,15 @@ public class EventServiceImplTest {
         Assert.assertEquals(savedEvent.getCreator().getFirstName(), "samuel");
         Assert.assertEquals(savedEvent.getParticipants().size(), 1);
         Assert.assertEquals(savedEvent.getParticipants().get(0).getFirstName(), "michael");
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testAddingParticipantToEventWithWrongUser(){
+        eventService.addSingleParticipantToEvent(1, 23);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testAddingParticipantToEventWithWrongEvent(){
+        eventService.addSingleParticipantToEvent(12, 1);
     }
 }
