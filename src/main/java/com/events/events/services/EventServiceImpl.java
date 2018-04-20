@@ -64,8 +64,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Event addSingleParticipantToEvent(int eventId, int userId) {
-        User user = userRepository.findById(new Integer(userId)).get();
-        Event event = eventRepository.findById(new Integer(eventId)).get();
 
         // check that the returned objects are not empty
         if(!userRepository.findById(new Integer(userId)).isPresent()){
@@ -73,6 +71,10 @@ public class EventServiceImpl implements EventService {
         }else if(!eventRepository.findById(new Integer(eventId)).isPresent()){
             throw new NotFoundException("Event with id: "+eventId+" not found");
         }
+
+        User user = userRepository.findById(new Integer(userId)).get();
+        Event event = eventRepository.findById(new Integer(eventId)).get();
+
         // check that the user does not exist in the
         if(event.getParticipants().isEmpty()){
             List<User> participants = event.getParticipants();
