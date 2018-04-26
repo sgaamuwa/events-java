@@ -1,6 +1,7 @@
 package com.events.events.services;
 
 
+import com.events.events.error.DuplicateCreationException;
 import com.events.events.models.Event;
 import com.events.events.models.User;
 import com.events.events.repository.EventRepository;
@@ -86,7 +87,7 @@ public class EventServiceImpl implements EventService {
             participants.add(user);
             event.setParticipants(participants);
         }else{
-            System.out.println("done");
+            throw new DuplicateCreationException("This was not expected");
         }
         return eventRepository.save(event);
     }
