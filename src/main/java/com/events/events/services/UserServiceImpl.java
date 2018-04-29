@@ -1,5 +1,7 @@
 package com.events.events.services;
 
+import com.events.events.error.NotFoundException;
+import com.events.events.models.Event;
 import com.events.events.models.User;
 import com.events.events.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -36,7 +39,29 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUser(User user) {
+    public void deleteUser(int userId) {
+        User user = verifyAndReturnUser(userId);
         userRepository.delete(user);
     }
+
+    @Override
+    public List<Event> listEventsByUser(int userId) {
+        User user = verifyAndReturnUser(userId);
+        return user.getCreatedEvents();
+    }
+
+    @Override
+    public List<Event> listEventsUserIsAttending(int userId) {
+        User user = verifyAndReturnUser(userId);
+        return user.getAttending();
+    }
+
+    private User verifyAndReturnUser(int userId){
+        Optional<User> user = userRepository.findById(userId);
+        if(!user.isPresent()){
+            throw new NotFoundException("User with id: "+userId+" not found");
+        }
+        return user.get();
+    }
+
 }
