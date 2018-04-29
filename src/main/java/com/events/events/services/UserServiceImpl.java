@@ -1,5 +1,6 @@
 package com.events.events.services;
 
+import com.events.events.error.DuplicateCreationException;
 import com.events.events.error.NotFoundException;
 import com.events.events.models.Event;
 import com.events.events.models.User;
@@ -21,6 +22,10 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public User saveUser(User user){
+        //check if the username exists
+        if(userRepository.findByUsername(user.getUsername()).isPresent()){
+            throw new DuplicateCreationException("User with the username: "+user.getUsername()+" already exists");
+        }
         user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
         return userRepository.save(user);
     }
