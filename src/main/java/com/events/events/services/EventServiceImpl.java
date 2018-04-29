@@ -7,12 +7,10 @@ import com.events.events.models.User;
 import com.events.events.repository.EventRepository;
 import com.events.events.repository.UserRepository;
 import com.events.events.error.NotFoundException;
-import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class EventServiceImpl implements EventService {
@@ -34,47 +32,42 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public void deleteEvent(Event event) {
-
-    }
-
-    @Override
-    public List<Event> listEventsByUser(User user) {
-        return null;
-    }
-
-    @Override
-    public List<Event> listEventsUserIsAttending(User user) {
-        return null;
+    public void deleteEvent(int eventId) {
+        Event event = verifyAndReturnEvent(eventId);
+        eventRepository.delete(event);
     }
 
     @Override
     public Event addMultipleParticipantsToEvent(int eventId, int[] participants) {
-        List<Integer> userIds = new ArrayList<>();
-        for(int participant : participants){
-            userIds.add(participant);
-        }
-        List<User> users = userRepository.findAllById(userIds);
-        Event event = eventRepository.findById(new Integer(eventId)).get();
-        List<User> usersAttending = event.getParticipants();
+        // retrieve the users and event
+        Integer[] userIds = Arrays.stream(participants).boxed().toArray(Integer[]::new);
+        List<User> users = userRepository.findAllById(new ArrayList<>(Arrays.asList(userIds)));
 
-        usersAttending.addAll(usersAttending);
-        event.setParticipants(usersAttending);
+        //check the returned objects are not empty
+        if(users.isEmpty()){
+            throw new NotFoundException("No users with the provided ids");
+        }else if(!eventRepository.findById(new Integer(eventId)).isPresent()){
+            throw new NotFoundException("Event with id: "+eventId+" not found");
+        }
+
+        Event event = eventRepository.findById(new Integer(eventId)).get();
+
+        if(event.getParticipants().isEmpty()){
+            event.setParticipants(users);
+        }else if(Collections.disjoint(users, event.getParticipants())){
+            List<User> newParticipantsList = event.getParticipants();
+            newParticipantsList.addAll(users);
+            event.setParticipants(newParticipantsList);
+        }
+
         return eventRepository.save(event);
     }
 
     @Override
     public Event addSingleParticipantToEvent(int eventId, int userId) {
 
-        // check that the returned objects are not empty
-        if(!userRepository.findById(new Integer(userId)).isPresent()){
-            throw new NotFoundException("User with id: "+userId+" not found");
-        }else if(!eventRepository.findById(new Integer(eventId)).isPresent()){
-            throw new NotFoundException("Event with id: "+eventId+" not found");
-        }
-
-        User user = userRepository.findById(new Integer(userId)).get();
-        Event event = eventRepository.findById(new Integer(eventId)).get();
+        User user = verifyAndReturnUser(userId);
+        Event event = verifyAndReturnEvent(eventId);
 
         // check that the user does not exist in the
         if(event.getParticipants().isEmpty()){
@@ -87,8 +80,24 @@ public class EventServiceImpl implements EventService {
             participants.add(user);
             event.setParticipants(participants);
         }else{
-            throw new DuplicateCreationException("This was not expected");
+            throw new DuplicateCreationException("User with id: "+userId+" is already a participant");
         }
         return eventRepository.save(event);
+    }
+
+    private Event verifyAndReturnEvent(int eventId){
+        Optional<Event> event = eventRepository.findById(new Integer(eventId));
+        if(!event.isPresent()){
+            throw new NotFoundException("Event with id: "+eventId+" not found");
+        }
+        return event.get();
+    }
+
+    private User verifyAndReturnUser(int userId){
+        Optional<User> user = userRepository.findById(userId);
+        if(!user.isPresent()){
+            throw new NotFoundException("User with id: "+userId+" not found");
+        }
+        return user.get();
     }
 }
