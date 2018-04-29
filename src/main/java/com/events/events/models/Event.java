@@ -1,5 +1,10 @@
 package com.events.events.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import javax.persistence.*;
 import java.net.URL;
 import java.util.ArrayList;
@@ -7,6 +12,9 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties(value = {"createdAt", "updatedAt"},
+        allowGetters = true)
 @Table(name = "events")
 public class Event {
 
@@ -26,6 +34,14 @@ public class Event {
 
     @ManyToMany(mappedBy = "attending")
     private List<User> participants;
+
+    @Column(nullable = false, updatable = false)
+    @CreatedDate
+    private Date createdAt;
+
+    @Column(nullable = false)
+    @LastModifiedDate
+    private Date updatedAt;
 
     public Event(){
         this.participants = new ArrayList<>();
@@ -111,5 +127,13 @@ public class Event {
 
     public void setParticipants(List<User> participants) {
         this.participants = participants;
+    }
+
+    public Date getCreatedAt(){
+        return createdAt;
+    }
+
+    public Date getUpdatedAt(){
+        return updatedAt;
     }
 }
