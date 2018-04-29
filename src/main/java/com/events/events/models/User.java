@@ -1,12 +1,14 @@
 package com.events.events.models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -22,7 +24,11 @@ public class User {
     private int id;
     private String firstName;
     private String lastName;
+
+    @Column(nullable = false)
     private String username;
+
+    @JsonIgnore
     private String password;
 
     @Column(nullable = false, updatable = false)

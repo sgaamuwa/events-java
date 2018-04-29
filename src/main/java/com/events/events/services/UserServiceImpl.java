@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User getUserById(int id) {
-        return userRepository.getOne(new Integer(id));
+        return verifyAndReturnUser(id);
     }
 
     @Override
@@ -50,12 +50,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public List<Event> listEventsByUser(int userId) {
         User user = verifyAndReturnUser(userId);
         return user.getCreatedEvents();
     }
 
     @Override
+    @Transactional
     public List<Event> listEventsUserIsAttending(int userId) {
         User user = verifyAndReturnUser(userId);
         return user.getAttending();
