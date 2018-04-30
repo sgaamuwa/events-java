@@ -2,6 +2,7 @@ package com.events.events.services;
 
 
 import com.events.events.error.DuplicateCreationException;
+import com.events.events.error.InvalidDateException;
 import com.events.events.models.Event;
 import com.events.events.models.User;
 import com.events.events.repository.EventRepository;
@@ -10,6 +11,7 @@ import com.events.events.error.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -23,6 +25,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Event saveEvent(Event event) {
+        if(event.getDate().isBefore(LocalDate.now().plusDays(1))){
+            throw new InvalidDateException("Event date must be at least a day from now");
+        }
         return eventRepository.save(event);
     }
 
