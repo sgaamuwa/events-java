@@ -6,9 +6,10 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -25,8 +26,10 @@ public class Event {
     @Column(nullable = false)
     private String title;
     private String location;
+
+    @org.hibernate.validator.constraints.URL
     private URL link;
-    private Date date;
+    private LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -37,17 +40,17 @@ public class Event {
 
     @Column(nullable = false, updatable = false)
     @CreatedDate
-    private Date createdAt;
+    private LocalDate createdAt;
 
     @Column(nullable = false)
     @LastModifiedDate
-    private Date updatedAt;
+    private LocalDate updatedAt;
 
     public Event(){
         this.participants = new ArrayList<>();
     }
 
-    public Event(String title, String location, Date date, User creator) {
+    public Event(String title, String location, LocalDate date, User creator) {
         this.title = title;
         this.location = location;
         this.date = date;
@@ -55,7 +58,7 @@ public class Event {
         this.participants = new ArrayList<>();
     }
 
-    public Event(String title, String location, URL link, Date date, User creator) {
+    public Event(String title, String location, URL link, LocalDate date, User creator) {
         this.title = title;
         this.location = location;
         this.link = link;
@@ -64,7 +67,7 @@ public class Event {
         this.participants = new ArrayList<>();
     }
 
-    public Event(String title, String location, URL link, Date date, User creator, List<User> participants) {
+    public Event(String title, String location, URL link, LocalDate date, User creator, List<User> participants) {
         this.title = title;
         this.location = location;
         this.link = link;
@@ -105,7 +108,7 @@ public class Event {
         this.link = link;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
@@ -117,7 +120,7 @@ public class Event {
         this.creator = creator;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
@@ -129,11 +132,11 @@ public class Event {
         this.participants = participants;
     }
 
-    public Date getCreatedAt(){
+    public LocalDate getCreatedAt(){
         return createdAt;
     }
 
-    public Date getUpdatedAt(){
+    public LocalDate getUpdatedAt(){
         return updatedAt;
     }
 }
