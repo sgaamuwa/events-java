@@ -1,5 +1,8 @@
 package com.events.events.services;
 
+import com.events.events.error.DuplicateCreationException;
+import com.events.events.error.NotFoundException;
+import com.events.events.models.Event;
 import com.events.events.models.User;
 import com.events.events.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
@@ -8,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -18,6 +22,10 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public User saveUser(User user){
+        //check if the username exists
+        if(userRepository.findByUsername(user.getUsername()).isPresent()){
+            throw new DuplicateCreationException("User with the username: "+user.getUsername()+" already exists");
+        }
         user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
         return userRepository.save(user);
     }
@@ -25,7 +33,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User getUserById(int id) {
-        return userRepository.getOne(new Integer(id));
+        return verifyAndReturnUser(id);
     }
 
     @Override
@@ -36,7 +44,31 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUser(User user) {
+    public void deleteUser(int userId) {
+        User user = verifyAndReturnUser(userId);
         userRepository.delete(user);
     }
+
+    @Override
+    @Transactional
+    public List<Event> listEventsByUser(int userId) {
+        User user = verifyAndReturnUser(userId);
+        return user.getCreatedEvents();
+    }
+
+    @Override
+    @Transactional
+    public List<Event> listEventsUserIsAttending(int userId) {
+        User user = verifyAndReturnUser(userId);
+        return user.getAttending();
+    }
+
+    private User verifyAndReturnUser(int userId){
+        Optional<User> user = userRepository.findById(userId);
+        if(!user.isPresent()){
+            throw new NotFoundException("User with id: "+userId+" not found");
+        }
+        return user.get();
+    }
+
 }

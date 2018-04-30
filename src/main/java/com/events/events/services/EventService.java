@@ -9,8 +9,8 @@ public interface EventService {
 
     Event saveEvent(Event event);
     Event updateEvent(Event event);
-    void deleteEvent(Event event);
-    List<Event> listEventsByUser(User user);
-    List<Event> listEventsUserIsAttending(User user);
+    void deleteEvent(int eventId);
+    Event addMultipleParticipantsToEvent(int eventId, int[] participants);
+    Event addSingleParticipantToEvent(int eventId, int userId);
 
 }

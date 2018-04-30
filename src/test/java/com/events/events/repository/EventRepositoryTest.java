@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,7 +33,7 @@ public class EventRepositoryTest {
         User male = new User("michael", "male", "mmale", "pass123");
         User bruce = new User("bruce", "bigirwenyka", "bbigirwenkya", "pass123");
         // create and event
-        Event cinemaMovie = new Event("Movie", "Acacia Mall", new Date(), samuel);
+        Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now(), samuel);
 
         List<User> participants = new ArrayList<>();
         participants.add(male);

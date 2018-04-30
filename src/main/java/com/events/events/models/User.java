@@ -1,10 +1,23 @@
 package com.events.events.models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.util.List;
+import java.time.LocalDate;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties(value = {"createdAt", "updatedAt"},
+        allowGetters = true)
 @Table(name = "users")
 public class User {
 
@@ -13,8 +26,21 @@ public class User {
     private int id;
     private String firstName;
     private String lastName;
+
+    @NotEmpty(message = "Username is required")
     private String username;
+
+    @NotEmpty(message = "Password is required")
+    @Size(min = 5, message = "Password must be {min} or more characters long")
     private String password;
+
+    @Column(nullable = false, updatable = false)
+    @CreatedDate
+    private LocalDate createdAt;
+
+    @Column(nullable = false)
+    @LastModifiedDate
+    private LocalDate updatedAt;
 
     @OneToMany(mappedBy = "creator")
     private List<Event> createdEvents;
@@ -66,10 +92,12 @@ public class User {
         this.username = username;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
 
+    @JsonProperty
     public void setPassword(String password) {
         this.password = password;
     }
@@ -88,5 +116,13 @@ public class User {
 
     public void setAttending(List<Event> attending) {
         this.attending = attending;
+    }
+
+    public LocalDate getCreatedAt(){
+        return createdAt;
+    }
+
+    public LocalDate getUpdatedAt(){
+        return updatedAt;
     }
 }
