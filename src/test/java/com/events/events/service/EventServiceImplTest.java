@@ -75,15 +75,21 @@ public class EventServiceImplTest {
     @Test(expected = NotFoundException.class)
     public void testAddingParticipantToEventWithWrongUser(){
         eventService.addSingleParticipantToEvent(1, 23);
+        // ensure the save method is never called
+        Mockito.verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
     }
 
     @Test(expected = NotFoundException.class)
     public void testAddingParticipantToEventWithWrongEvent(){
         eventService.addSingleParticipantToEvent(12, 1);
+        // ensure the save method is never called
+        Mockito.verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
     }
 
     @Test(expected = DuplicateCreationException.class)
     public void testAddingParticipantToEventWithParticipant(){
         eventService.addSingleParticipantToEvent(2, 1);
+        // ensure the save method is never called
+        Mockito.verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
     }
 }
