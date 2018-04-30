@@ -22,14 +22,13 @@ public class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    public void testFindById(){
+    public void testFindByUsername(){
         User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123");
         entityManager.persist(samuel);
         entityManager.flush();
 
-        Optional<User> returnedUser = userRepository.findById(new Integer(1));
+        Optional<User> returnedUser = userRepository.findByUsername("sgaamuwa");
 
-        Assert.assertEquals("samuel", returnedUser.get().getFirstName());
-
+        Assert.assertEquals(samuel, returnedUser.get());
     }
 }
