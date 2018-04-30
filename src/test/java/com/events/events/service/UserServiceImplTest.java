@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 @RunWith(SpringRunner.class)
 public class UserServiceImplTest {
 
@@ -65,10 +67,14 @@ public class UserServiceImplTest {
 
     }
 
-    @Test(expected = DuplicateCreationException.class)
+    @Test
     public void testDoesNotCreateUserWithExistentUsername(){
         Mockito.when(userRepository.findByUsername("sgaamuwa")).thenReturn(Optional.of(samuel));
-        userService.saveUser(joy);
+        Throwable exception = assertThrows(DuplicateCreationException.class, () -> {
+            userService.saveUser(joy);
+        });
+        Assert.assertEquals("User with the username: sgaamuwa already exists", exception.getMessage());
+        Mockito.verify(userRepository, Mockito.never()).save(Mockito.any(User.class));
     }
 
     @Test
@@ -107,9 +113,13 @@ public class UserServiceImplTest {
         Assert.assertEquals(argument.getValue(), samuel);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void testDeleteUserWithInvalidId(){
-        userService.deleteUser(33);
+
+        Throwable exception = assertThrows(NotFoundException.class, () -> {
+            userService.deleteUser(33);
+        });
+        Assert.assertEquals("User with id: 33 not found", exception.getMessage());
         Mockito.verify(userRepository, Mockito.never()).delete(Mockito.any(User.class));
     }
 

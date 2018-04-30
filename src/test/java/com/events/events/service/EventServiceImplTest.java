@@ -1,6 +1,7 @@
 package com.events.events.service;
 
 import com.events.events.error.DuplicateCreationException;
+import com.events.events.error.InvalidDateException;
 import com.events.events.error.NotFoundException;
 import com.events.events.models.Event;
 import com.events.events.models.User;
@@ -20,7 +21,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
 import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @RunWith(SpringRunner.class)
 public class EventServiceImplTest {
@@ -48,8 +52,8 @@ public class EventServiceImplTest {
     public void setup(){
         User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123");
         User male = new User("michael", "male", "mmale", "pass123");
-        Event cinemaMovie = new Event("Movie", "Acacia Mall", new Date(), samuel);
-        Event beach = new Event("Beach", "Entebbe", new Date(), samuel);
+        Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now(), samuel);
+        Event beach = new Event("Beach", "Entebbe", LocalDate.now(), samuel);
         beach.setParticipants(new ArrayList<>(Arrays.asList(male)));
         Mockito.when(userRepository.findById(new Integer(1))).thenReturn(Optional.of(male));
         Mockito.when(eventRepository.findById(new Integer(1))).thenReturn(Optional.of(cinemaMovie));
@@ -72,24 +76,72 @@ public class EventServiceImplTest {
         Assert.assertEquals(savedEvent.getParticipants().get(0).getFirstName(), "michael");
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void testAddingParticipantToEventWithWrongUser(){
-        eventService.addSingleParticipantToEvent(1, 23);
+
+        Throwable exception = assertThrows(NotFoundException.class, () -> {
+            eventService.addSingleParticipantToEvent(1, 23);
+        });
+        Assert.assertEquals("User with id: 23 not found", exception.getMessage());
         // ensure the save method is never called
         Mockito.verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void testAddingParticipantToEventWithWrongEvent(){
-        eventService.addSingleParticipantToEvent(12, 1);
+
+        Throwable exception = assertThrows(NotFoundException.class, () -> {
+            eventService.addSingleParticipantToEvent(12, 1);
+        });
+        Assert.assertEquals("Event with id: 12 not found", exception.getMessage());
         // ensure the save method is never called
         Mockito.verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
     }
 
-    @Test(expected = DuplicateCreationException.class)
+    @Test
     public void testAddingParticipantToEventWithParticipant(){
-        eventService.addSingleParticipantToEvent(2, 1);
+
+        Throwable exception = assertThrows(DuplicateCreationException.class, () -> {
+            eventService.addSingleParticipantToEvent(2, 1);
+        });
+        Assert.assertEquals("User with id: 1 is already a participant", exception.getMessage());
         // ensure the save method is never called
         Mockito.verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
+    }
+
+    @Test
+    public void testSaveEventWithOldDate(){
+        User user = Mockito.mock(User.class);
+        Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now().minusDays(1), user);
+
+        Throwable exception = assertThrows(InvalidDateException.class, () -> {
+            eventService.saveEvent(cinemaMovie);
+        });
+        Assert.assertEquals("Event date must be at least a day from now", exception.getMessage());
+
+        Mockito.verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
+    }
+
+    @Test
+    public void testSaveEventWithCurrentDate(){
+        User user = Mockito.mock(User.class);
+        Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now(), user);
+
+        Throwable exception = assertThrows(InvalidDateException.class, () -> {
+            eventService.saveEvent(cinemaMovie);
+        });
+        Assert.assertEquals("Event date must be at least a day from now", exception.getMessage());
+
+        Mockito.verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
+    }
+
+    @Test
+    public void testSaveEventWithFutureDate(){
+        User user = Mockito.mock(User.class);
+        Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now().plusDays(2), user);
+        ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);
+        eventService.saveEvent(cinemaMovie);
+        Mockito.verify(eventRepository, Mockito.atMost(1)).save(argument.capture());
+        Assert.assertEquals(argument.getValue(), cinemaMovie);
     }
 }
