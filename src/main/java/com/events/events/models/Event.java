@@ -27,7 +27,6 @@ public class Event {
     private String title;
     private String location;
 
-    @org.hibernate.validator.constraints.URL
     private URL link;
     private LocalDate date;
 
