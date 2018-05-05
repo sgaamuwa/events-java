@@ -2,6 +2,7 @@ package com.events.events.services;
 
 
 import com.events.events.error.DuplicateCreationException;
+import com.events.events.error.EmptyListException;
 import com.events.events.error.InvalidDateException;
 import com.events.events.models.Event;
 import com.events.events.models.User;
@@ -12,6 +13,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -25,6 +27,7 @@ public class EventServiceImpl implements EventService {
     private UserRepository userRepository;
 
     @Override
+    @Transactional
     public Event saveEvent(Event event) {
         if(event.getDate().isBefore(LocalDate.now().plusDays(1))){
             throw new InvalidDateException("Event date must be at least a day from now");
@@ -33,17 +36,40 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Event updateEvent(Event event) {
-        return null;
+    @Transactional
+    public Event updateEvent(int eventId, Event event) {
+        if(!eventRepository.existsById(eventId)){
+            throw new NotFoundException("Event with id: "+eventId+" not found");
+        }
+        event.setId(eventId);
+        return eventRepository.save(event);
     }
 
     @Override
+    @Transactional
     public void deleteEvent(int eventId) {
         Event event = verifyAndReturnEvent(eventId);
         eventRepository.delete(event);
     }
 
     @Override
+    @Transactional
+    public Event getEventById(int eventId) {
+        return verifyAndReturnEvent(eventId);
+    }
+
+    @Override
+    @Transactional
+    public List<Event> getAllEvents() {
+        List<Event> events = eventRepository.findAll();
+        if(events.isEmpty()){
+            throw new EmptyListException("There are no available events");
+        }
+        return events;
+    }
+
+    @Override
+    @Transactional
     public Event addMultipleParticipantsToEvent(int eventId, int[] participants) {
         // retrieve the users and event
         Integer[] userIds = Arrays.stream(participants).boxed().toArray(Integer[]::new);
@@ -70,6 +96,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public Event addSingleParticipantToEvent(int eventId, int userId) {
 
         User user = verifyAndReturnUser(userId);
@@ -95,13 +122,23 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Event getEventsByDate(LocalDate date) {
-        return null;
+    @Transactional
+    public List<Event> getEventsByDate(LocalDate date) {
+        List<Event> events = eventRepository.findByDate(date);
+        if(events.isEmpty()){
+            throw new EmptyListException("There are no available events for the date: "+ date);
+        }
+        return events;
     }
 
     @Override
+    @Transactional
     public List<Event> getEventsBetweenDates(LocalDate dateFrom, LocalDate dateTo) {
-        return null;
+        List<Event> events = eventRepository.getEventsBetweenDates(dateFrom, dateTo);
+        if(events.isEmpty()){
+            throw new EmptyListException("There are no available events for between the dates: "+ dateFrom + " and "+ dateTo);
+        }
+        return events;
     }
 
     private Event verifyAndReturnEvent(int eventId){

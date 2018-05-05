@@ -1,6 +1,7 @@
 package com.events.events.services;
 
 import com.events.events.error.DuplicateCreationException;
+import com.events.events.error.EmptyListException;
 import com.events.events.error.NotFoundException;
 import com.events.events.models.Event;
 import com.events.events.models.User;
@@ -53,6 +54,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public List<Event> listEventsByUser(int userId) {
         User user = verifyAndReturnUser(userId);
+        if(user.getCreatedEvents().isEmpty()){
+            throw new EmptyListException("There are no events for the user: "+ userId);
+        }
         return user.getCreatedEvents();
     }
 
@@ -60,6 +64,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public List<Event> listEventsUserIsAttending(int userId) {
         User user = verifyAndReturnUser(userId);
+        if(user.getAttending().isEmpty()){
+            throw new EmptyListException("The user: "+userId+" is not attending any events");
+        }
         return user.getAttending();
     }
 
