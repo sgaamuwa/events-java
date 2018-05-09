@@ -2,10 +2,11 @@ package com.events.events.services;
 
 import com.events.events.models.Event;
 import com.events.events.models.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
-public interface UserService {
+public interface UserService extends UserDetailsService {
 
     User saveUser(User user);
     User getUserById(int id);

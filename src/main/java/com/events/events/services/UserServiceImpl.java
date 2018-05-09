@@ -6,11 +6,14 @@ import com.events.events.error.NotFoundException;
 import com.events.events.models.Event;
 import com.events.events.models.User;
 import com.events.events.repository.UserRepository;
-import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +23,18 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> user = userRepository.findByUsername(username);
+        if(!user.isPresent()){
+            throw new UsernameNotFoundException("There is no user with the username: "+ username);
+        }
+
+        return new org.springframework.security.core.userdetails.User(user.get().getUsername(), user.get().getPassword(), Collections.emptyList());
+    }
 
     @Transactional
     public User saveUser(User user){
@@ -27,7 +42,7 @@ public class UserServiceImpl implements UserService {
         if(userRepository.findByUsername(user.getUsername()).isPresent()){
             throw new DuplicateCreationException("User with the username: "+user.getUsername()+" already exists");
         }
-        user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
