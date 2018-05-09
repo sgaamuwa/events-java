@@ -89,4 +89,20 @@ public class EventRepositoryTest {
         Assert.assertEquals(eventRepository.getEventsAfterDate(LocalDate.now().minusDays(1)).size(), 3);
     }
 
+    @Test
+    public void canGetEventsBeforeCertainDate(){
+        Event beach = new Event("beach", "Entebbe", LocalDate.now().plusDays(2), samuel);
+        Event jumping = new Event("jumping", "Jinja", LocalDate.now().plusDays(3), samuel);
+        Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now(), samuel);
+
+        entityManager.persist(samuel);
+        entityManager.persist(beach);
+        entityManager.persist(jumping);
+        entityManager.persist(cinemaMovie);
+
+        Assert.assertEquals(eventRepository.getEventsBeforeDate(LocalDate.now().plusDays(1)).size(), 1);
+        Assert.assertEquals(eventRepository.getEventsBeforeDate(LocalDate.now().minusDays(1)).size(), 0);
+        Assert.assertEquals(eventRepository.getEventsBeforeDate(LocalDate.now().plusDays(4)).size(), 3);
+    }
+
 }
