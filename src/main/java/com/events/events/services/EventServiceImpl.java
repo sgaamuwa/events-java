@@ -11,6 +11,7 @@ import com.events.events.repository.UserRepository;
 import com.events.events.error.NotFoundException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -32,6 +33,20 @@ public class EventServiceImpl implements EventService {
         if(event.getDate().isBefore(LocalDate.now().plusDays(1))){
             throw new InvalidDateException("Event date must be at least a day from now");
         }
+        return eventRepository.save(event);
+    }
+
+    @Override
+    @Transactional
+    public Event saveEvent(Event event, String username) {
+        if(event.getDate().isBefore(LocalDate.now().plusDays(1))){
+            throw new InvalidDateException("Event date must be at least a day from now");
+        }
+        Optional<User> user = userRepository.findByUsername(username);
+        if(!user.isPresent()){
+            throw new UsernameNotFoundException("User with username: "+username+" does not exist");
+        }
+        event.setCreator(user.get());
         return eventRepository.save(event);
     }
 

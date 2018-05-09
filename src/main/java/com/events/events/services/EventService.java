@@ -15,6 +15,14 @@ public interface EventService {
     Event saveEvent(Event event);
 
     /**
+     * This method to save a new event when a user is supplied
+     * @param event
+     * @param username
+     * @return
+     */
+    Event saveEvent(Event event, String username);
+
+    /**
      * This is a method to update an already existent event
      * @param event
      * @return Event
