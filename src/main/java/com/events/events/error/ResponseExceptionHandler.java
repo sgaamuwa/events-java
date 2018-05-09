@@ -30,4 +30,10 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(e, bodyOfResponse, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
+    @ExceptionHandler(EmptyListException.class)
+    protected ResponseEntity<Object> handleEmptyListException(RuntimeException e, WebRequest request){
+        String bodyOfResponse = e.getMessage();
+        return handleExceptionInternal(e, bodyOfResponse, new HttpHeaders(), HttpStatus.NO_CONTENT, request);
+    }
+
 }

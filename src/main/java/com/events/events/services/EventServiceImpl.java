@@ -2,15 +2,19 @@ package com.events.events.services;
 
 
 import com.events.events.error.DuplicateCreationException;
+import com.events.events.error.EmptyListException;
 import com.events.events.error.InvalidDateException;
 import com.events.events.models.Event;
 import com.events.events.models.User;
 import com.events.events.repository.EventRepository;
 import com.events.events.repository.UserRepository;
 import com.events.events.error.NotFoundException;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -24,6 +28,7 @@ public class EventServiceImpl implements EventService {
     private UserRepository userRepository;
 
     @Override
+    @Transactional
     public Event saveEvent(Event event) {
         if(event.getDate().isBefore(LocalDate.now().plusDays(1))){
             throw new InvalidDateException("Event date must be at least a day from now");
@@ -32,17 +37,54 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Event updateEvent(Event event) {
-        return null;
+    @Transactional
+    public Event saveEvent(Event event, String username) {
+        if(event.getDate().isBefore(LocalDate.now().plusDays(1))){
+            throw new InvalidDateException("Event date must be at least a day from now");
+        }
+        Optional<User> user = userRepository.findByUsername(username);
+        if(!user.isPresent()){
+            throw new UsernameNotFoundException("User with username: "+username+" does not exist");
+        }
+        event.setCreator(user.get());
+        return eventRepository.save(event);
     }
 
     @Override
+    @Transactional
+    public Event updateEvent(int eventId, Event event) {
+        if(!eventRepository.existsById(eventId)){
+            throw new NotFoundException("Event with id: "+eventId+" not found");
+        }
+        event.setId(eventId);
+        return eventRepository.save(event);
+    }
+
+    @Override
+    @Transactional
     public void deleteEvent(int eventId) {
         Event event = verifyAndReturnEvent(eventId);
         eventRepository.delete(event);
     }
 
     @Override
+    @Transactional
+    public Event getEventById(int eventId) {
+        return verifyAndReturnEvent(eventId);
+    }
+
+    @Override
+    @Transactional
+    public List<Event> getAllEvents() {
+        List<Event> events = eventRepository.findAll();
+        if(events.isEmpty()){
+            throw new EmptyListException("There are no available events");
+        }
+        return events;
+    }
+
+    @Override
+    @Transactional
     public Event addMultipleParticipantsToEvent(int eventId, int[] participants) {
         // retrieve the users and event
         Integer[] userIds = Arrays.stream(participants).boxed().toArray(Integer[]::new);
@@ -57,23 +99,27 @@ public class EventServiceImpl implements EventService {
 
         Event event = eventRepository.findById(new Integer(eventId)).get();
 
-        if(event.getParticipants().isEmpty()){
-            event.setParticipants(users);
-        }else if(Collections.disjoint(users, event.getParticipants())){
-            List<User> newParticipantsList = event.getParticipants();
-            newParticipantsList.addAll(users);
-            event.setParticipants(newParticipantsList);
+        // check that the event date has not passed
+        if(!checkEventDateHasNotPassed(event.getDate())){
+            throw new InvalidDateException("The date to add participants is passed");
         }
+
+        List<User> newParticipantsList = (List<User>) CollectionUtils.union(event.getParticipants(), users);
+        event.setParticipants(newParticipantsList);
 
         return eventRepository.save(event);
     }
 
     @Override
+    @Transactional
     public Event addSingleParticipantToEvent(int eventId, int userId) {
 
         User user = verifyAndReturnUser(userId);
         Event event = verifyAndReturnEvent(eventId);
-
+        // check that the event date has not passed
+        if(!checkEventDateHasNotPassed(event.getDate())){
+            throw new InvalidDateException("The date to add participants is passed");
+        }
         // check that the user does not exist in the
         if(event.getParticipants().isEmpty()){
             List<User> participants = event.getParticipants();
@@ -90,6 +136,26 @@ public class EventServiceImpl implements EventService {
         return eventRepository.save(event);
     }
 
+    @Override
+    @Transactional
+    public List<Event> getEventsByDate(LocalDate date) {
+        List<Event> events = eventRepository.findByDate(date);
+        if(events.isEmpty()){
+            throw new EmptyListException("There are no available events for the date: "+ date);
+        }
+        return events;
+    }
+
+    @Override
+    @Transactional
+    public List<Event> getEventsBetweenDates(LocalDate dateFrom, LocalDate dateTo) {
+        List<Event> events = eventRepository.getEventsBetweenDates(dateFrom, dateTo);
+        if(events.isEmpty()){
+            throw new EmptyListException("There are no available events for between the dates: "+ dateFrom + " and "+ dateTo);
+        }
+        return events;
+    }
+
     private Event verifyAndReturnEvent(int eventId){
         Optional<Event> event = eventRepository.findById(new Integer(eventId));
         if(!event.isPresent()){
@@ -99,10 +165,17 @@ public class EventServiceImpl implements EventService {
     }
 
     private User verifyAndReturnUser(int userId){
-        Optional<User> user = userRepository.findById(userId);
-        if(!user.isPresent()){
+        if(!userRepository.existsById(userId)){
             throw new NotFoundException("User with id: "+userId+" not found");
         }
-        return user.get();
+
+        return userRepository.findById(userId).get();
+    }
+
+    private boolean checkEventDateHasNotPassed(LocalDate eventDate){
+        if(LocalDate.now().isAfter(eventDate.minusDays(1))){
+            return false;
+        }
+        return true;
     }
 }

@@ -48,13 +48,12 @@ public class EventServiceImplTest {
     @MockBean
     private UserRepository userRepository;
 
+    private User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123");
+    private User male = new User("michael", "male", "mmale", "pass123");
+    private Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now().plusDays(3), samuel);
+    private Event beach = new Event("Beach", "Entebbe", LocalDate.now().plusDays(3), samuel);
     @Before
     public void setup(){
-        User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123");
-        User male = new User("michael", "male", "mmale", "pass123");
-        Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now(), samuel);
-        Event beach = new Event("Beach", "Entebbe", LocalDate.now(), samuel);
-        beach.setParticipants(new ArrayList<>(Arrays.asList(male)));
         Mockito.when(userRepository.findById(new Integer(1))).thenReturn(Optional.of(male));
         Mockito.when(eventRepository.findById(new Integer(1))).thenReturn(Optional.of(cinemaMovie));
         Mockito.when(eventRepository.findById(new Integer(2))).thenReturn(Optional.of(beach));
@@ -100,7 +99,7 @@ public class EventServiceImplTest {
 
     @Test
     public void testAddingParticipantToEventWithParticipant(){
-
+        beach.setParticipants(new ArrayList<>(Arrays.asList(male)));
         Throwable exception = assertThrows(DuplicateCreationException.class, () -> {
             eventService.addSingleParticipantToEvent(2, 1);
         });
@@ -143,5 +142,64 @@ public class EventServiceImplTest {
         eventService.saveEvent(cinemaMovie);
         Mockito.verify(eventRepository, Mockito.atMost(1)).save(argument.capture());
         Assert.assertEquals(argument.getValue(), cinemaMovie);
+    }
+
+    @Test
+    public void testDeleteEventWithValidId(){
+        Event event = Mockito.mock(Event.class);
+        Mockito.when(eventRepository.findById(new Integer(1))).thenReturn(Optional.of(event));
+        eventService.deleteEvent(1);
+        Mockito.verify(eventRepository, Mockito.atMost(1)).delete(event);
+    }
+
+    @Test
+    public void testDeleteEventWithInvalidId(){
+
+        Throwable exception = assertThrows(NotFoundException.class, () -> {
+            eventService.deleteEvent(12);
+        });
+        Assert.assertEquals("Event with id: 12 not found", exception.getMessage());
+        Mockito.verify(eventRepository, Mockito.never()).delete(Mockito.any(Event.class));
+    }
+
+    @Test
+    public void testAddMultipleParticipantsAllValidUserIds(){
+        User user1 = Mockito.mock(User.class);
+        User user2 = Mockito.mock(User.class);
+        User user3 = Mockito.mock(User.class);
+        User user4 = Mockito.mock(User.class);
+        List<User> users = new ArrayList<>(Arrays.asList(user1, user2, user3, user4));
+
+        int[] participants = new int[] {1, 2, 3, 4};
+        Integer[] userIds = Arrays.stream(participants).boxed().toArray(Integer[]::new);
+        Mockito.when(userRepository.findAllById(Arrays.asList(userIds))).thenReturn(users);
+        Mockito.when(eventRepository.save(cinemaMovie)).thenReturn(cinemaMovie);
+
+        Event returnedEvent = eventService.addMultipleParticipantsToEvent(1, participants);
+
+        Assert.assertEquals(returnedEvent.getParticipants().size(), 4);
+
+    }
+
+    @Test
+    public void testAddMultipleParticipantsWithOneAlreadyAttending(){
+        beach.setParticipants(new ArrayList<>(Arrays.asList(male)));
+        User user1 = Mockito.mock(User.class);
+        List<User> users = new ArrayList<>(Arrays.asList(male, user1));
+
+        int[] participants = new int[]{1, 2};
+        Integer[] userIds = Arrays.stream(participants).boxed().toArray(Integer[]::new);
+
+        Mockito.when(userRepository.findAllById(Arrays.asList(userIds))).thenReturn(users);
+        Mockito.when(eventRepository.save(beach)).thenReturn(beach);
+
+        Assert.assertEquals(beach.getParticipants().size(), 1);
+
+        Event returnedEvent = eventService.addMultipleParticipantsToEvent(2, participants);
+
+        Assert.assertEquals(returnedEvent, beach);
+        Assert.assertEquals(returnedEvent.getParticipants().size(), 2);
+        Assert.assertEquals(returnedEvent.getParticipants().get(0), male);
+        Assert.assertEquals(returnedEvent.getParticipants().get(1), user1);
     }
 }
