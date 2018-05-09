@@ -1,5 +1,7 @@
-package com.events.events.config;
+package com.events.events.config.security;
 
+import com.events.events.config.security.Filters.JWTAuthenticationFilter;
+import com.events.events.config.security.Filters.JWTAuthorizationFilter;
 import com.events.events.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -24,12 +26,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
+        http.csrf().disable()
                 .authorizeRequests()
+                .antMatchers("/register").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
-                .httpBasic();
+                .addFilter(new JWTAuthenticationFilter(authenticationManager()))
+                .addFilter(new JWTAuthorizationFilter(authenticationManager()));
 
     }
 }
