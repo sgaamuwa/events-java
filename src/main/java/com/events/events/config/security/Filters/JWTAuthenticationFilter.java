@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -51,5 +53,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .signWith(SignatureAlgorithm.HS512, SecurityConstants.SECRETKEY.getConstant())
                 .compact();
         response.addHeader(SecurityConstants.HEADER_STRING.getConstant(), SecurityConstants.TOKEN_PREFIX.getConstant() + token);
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("token", token);
+        new ObjectMapper().writeValue(response.getWriter(), responseBody);
     }
 }
