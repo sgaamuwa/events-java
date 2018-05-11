@@ -4,6 +4,7 @@ package com.events.events.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -23,10 +24,16 @@ public class User {
 
     @Id
     @GeneratedValue
+    @JsonView(Views.Summarised.class)
     private int id;
+
+    @JsonView(Views.Summarised.class)
     private String firstName;
+
+    @JsonView(Views.Summarised.class)
     private String lastName;
 
+    @JsonView(Views.Summarised.class)
     @NotEmpty(message = "Username is required")
     private String username;
 
@@ -36,19 +43,23 @@ public class User {
 
     @Column(nullable = false, updatable = false)
     @CreatedDate
+    @JsonView(Views.UserExtended.class)
     private LocalDate createdAt;
 
     @Column(nullable = false)
     @LastModifiedDate
+    @JsonView(Views.UserExtended.class)
     private LocalDate updatedAt;
 
     @OneToMany(mappedBy = "creator")
+    @JsonView(Views.UserExtended.class)
     private List<Event> createdEvents;
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "user_event",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "event_id", referencedColumnName = "id"))
+    @JsonView(Views.UserExtended.class)
     private List<Event> attending;
 
     public User(){}
