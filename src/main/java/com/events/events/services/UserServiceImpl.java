@@ -1,5 +1,6 @@
 package com.events.events.services;
 
+import com.events.events.error.AuthenticationException;
 import com.events.events.error.DuplicateCreationException;
 import com.events.events.error.EmptyListException;
 import com.events.events.error.NotFoundException;
@@ -27,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findByUsername(username);
         if(!user.isPresent()){
@@ -63,6 +65,16 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(int userId) {
         User user = verifyAndReturnUser(userId);
         userRepository.delete(user);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(int userId, String oldPassword, String newPassword) {
+        User user = verifyAndReturnUser(userId);
+        if(!bCryptPasswordEncoder.matches(oldPassword, user.getPassword())){
+            throw new AuthenticationException("Password does not match current password");
+        }
+        user.setPassword(bCryptPasswordEncoder.encode(newPassword));
     }
 
     @Override
