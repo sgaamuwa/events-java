@@ -71,5 +71,7 @@ public interface EventService {
      */
     List<Event> getEventsByDate(LocalDate date);
     List<Event> getEventsBetweenDates(LocalDate dateFrom, LocalDate dateTo);
+    List<Event> getEventsAfterDate(LocalDate date);
+    List<Event> getEventsBeforeDate(LocalDate date);
 
 }

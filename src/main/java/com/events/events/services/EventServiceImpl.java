@@ -39,15 +39,12 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public Event saveEvent(Event event, String username) {
-        if(event.getDate().isBefore(LocalDate.now().plusDays(1))){
-            throw new InvalidDateException("Event date must be at least a day from now");
-        }
         Optional<User> user = userRepository.findByUsername(username);
         if(!user.isPresent()){
             throw new UsernameNotFoundException("User with username: "+username+" does not exist");
         }
         event.setCreator(user.get());
-        return eventRepository.save(event);
+        return saveEvent(event);
     }
 
     @Override
@@ -152,6 +149,24 @@ public class EventServiceImpl implements EventService {
         List<Event> events = eventRepository.getEventsBetweenDates(dateFrom, dateTo);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events for between the dates: "+ dateFrom + " and "+ dateTo);
+        }
+        return events;
+    }
+
+    @Override
+    public List<Event> getEventsAfterDate(LocalDate date) {
+        List<Event> events = eventRepository.getEventsAfterDate(date);
+        if(events.isEmpty()){
+            throw new EmptyListException("There are no available events after the date: "+ date);
+        }
+        return events;
+    }
+
+    @Override
+    public List<Event> getEventsBeforeDate(LocalDate date) {
+        List<Event> events = eventRepository.getEventsBeforeDate(date);
+        if(events.isEmpty()){
+            throw new EmptyListException("There are no available events before the date: "+ date);
         }
         return events;
     }
