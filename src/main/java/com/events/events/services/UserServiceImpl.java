@@ -43,6 +43,8 @@ public class UserServiceImpl implements UserService {
         //check if the username exists
         if(userRepository.findByUsername(user.getUsername()).isPresent()){
             throw new DuplicateCreationException("User with the username: "+user.getUsername()+" already exists");
+        }else if(user.getPassword().trim().length() < 5){
+            throw new AuthenticationException("New Password must be more than 5");
         }
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
@@ -73,8 +75,13 @@ public class UserServiceImpl implements UserService {
         User user = verifyAndReturnUser(userId);
         if(!bCryptPasswordEncoder.matches(oldPassword, user.getPassword())){
             throw new AuthenticationException("Password does not match current password");
+        } else if(bCryptPasswordEncoder.matches(newPassword, user.getPassword())){
+            throw new AuthenticationException("New Password can't be the same as the old password");
+        } else if(newPassword.trim().length() < 5){
+            throw new AuthenticationException("New Password must be more than 5");
         }
         user.setPassword(bCryptPasswordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 
     @Override
