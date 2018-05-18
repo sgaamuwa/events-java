@@ -1,5 +1,6 @@
 package com.events.events.services;
 
+import com.events.events.error.AuthenticationException;
 import com.events.events.error.DuplicateCreationException;
 import com.events.events.error.EmptyListException;
 import com.events.events.error.NotFoundException;
@@ -27,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findByUsername(username);
         if(!user.isPresent()){
@@ -41,6 +43,8 @@ public class UserServiceImpl implements UserService {
         //check if the username exists
         if(userRepository.findByUsername(user.getUsername()).isPresent()){
             throw new DuplicateCreationException("User with the username: "+user.getUsername()+" already exists");
+        }else if(user.getPassword().trim().length() < 5){
+            throw new AuthenticationException("New Password must be more than 5");
         }
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
@@ -63,6 +67,21 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(int userId) {
         User user = verifyAndReturnUser(userId);
         userRepository.delete(user);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(int userId, String oldPassword, String newPassword) {
+        User user = verifyAndReturnUser(userId);
+        if(!bCryptPasswordEncoder.matches(oldPassword, user.getPassword())){
+            throw new AuthenticationException("Password does not match current password");
+        } else if(bCryptPasswordEncoder.matches(newPassword, user.getPassword())){
+            throw new AuthenticationException("New Password can't be the same as the old password");
+        } else if(newPassword.trim().length() < 5){
+            throw new AuthenticationException("New Password must be more than 5");
+        }
+        user.setPassword(bCryptPasswordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 
     @Override

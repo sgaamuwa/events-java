@@ -15,25 +15,31 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     protected ResponseEntity<Object> handleNotFoundException(RuntimeException e, WebRequest request){
-        String bodyOfResponse = e.getMessage();
-        return handleExceptionInternal(e, bodyOfResponse, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+        CustomErrorMessage customErrorMessage = new CustomErrorMessage(HttpStatus.NOT_FOUND, e.getMessage(), e.getCause().toString());
+        return handleExceptionInternal(e, customErrorMessage, new HttpHeaders(), customErrorMessage.getStatus(), request);
     }
 
     protected ResponseEntity<Object> handleDuplicateCreationException(RuntimeException e, WebRequest request){
-        String bodyOfResponse = e.getMessage();
-        return handleExceptionInternal(e, bodyOfResponse, new HttpHeaders(), HttpStatus.NOT_ACCEPTABLE, request);
+        CustomErrorMessage customErrorMessage = new CustomErrorMessage(HttpStatus.NOT_ACCEPTABLE, e.getMessage(), e.getCause().toString());
+        return handleExceptionInternal(e, customErrorMessage, new HttpHeaders(), customErrorMessage.getStatus(), request);
     }
 
     @ExceptionHandler(value = {ConstraintViolationException.class, InvalidDateException.class})
     protected ResponseEntity<Object> handleConstraintViolationException(RuntimeException e, WebRequest request){
-        String bodyOfResponse = e.getMessage();
-        return handleExceptionInternal(e, bodyOfResponse, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        CustomErrorMessage customErrorMessage = new CustomErrorMessage(HttpStatus.BAD_REQUEST, e.getMessage(), e.getCause().toString());
+        return handleExceptionInternal(e, customErrorMessage, new HttpHeaders(), customErrorMessage.getStatus(), request);
     }
 
     @ExceptionHandler(EmptyListException.class)
     protected ResponseEntity<Object> handleEmptyListException(RuntimeException e, WebRequest request){
-        String bodyOfResponse = e.getMessage();
-        return handleExceptionInternal(e, bodyOfResponse, new HttpHeaders(), HttpStatus.NO_CONTENT, request);
+        CustomErrorMessage customErrorMessage = new CustomErrorMessage(HttpStatus.NO_CONTENT, e.getMessage(), e.getCause().toString());
+        return handleExceptionInternal(e, customErrorMessage, new HttpHeaders(), customErrorMessage.getStatus(), request);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    protected ResponseEntity handleAuthenticationException(RuntimeException e, WebRequest request){
+        CustomErrorMessage customErrorMessage = new CustomErrorMessage(HttpStatus.BAD_REQUEST, e.getMessage(), e.getCause().toString());
+        return handleExceptionInternal(e, customErrorMessage, new HttpHeaders(), customErrorMessage.getStatus(), request);
     }
 
 }
