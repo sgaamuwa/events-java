@@ -90,11 +90,11 @@ public class EventServiceImpl implements EventService {
         //check the returned objects are not empty
         if(users.isEmpty()){
             throw new NotFoundException("No users with the provided ids");
-        }else if(!eventRepository.findById(new Integer(eventId)).isPresent()){
+        }else if(!eventRepository.findById(eventId).isPresent()){
             throw new NotFoundException("Event with id: "+eventId+" not found");
         }
 
-        Event event = eventRepository.findById(new Integer(eventId)).get();
+        Event event = eventRepository.findById(eventId).get();
 
         // check that the event date has not passed
         if(!checkEventDateHasNotPassed(event.getDate())){
@@ -172,7 +172,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private Event verifyAndReturnEvent(int eventId){
-        Optional<Event> event = eventRepository.findById(new Integer(eventId));
+        Optional<Event> event = eventRepository.findById(eventId);
         if(!event.isPresent()){
             throw new NotFoundException("Event with id: "+eventId+" not found");
         }
@@ -180,11 +180,11 @@ public class EventServiceImpl implements EventService {
     }
 
     private User verifyAndReturnUser(int userId){
-        if(!userRepository.existsById(userId)){
+        Optional<User> user = userRepository.findById(userId);
+        if(!user.isPresent()){
             throw new NotFoundException("User with id: "+userId+" not found");
         }
-
-        return userRepository.findById(userId).get();
+        return user.get();
     }
 
     private boolean checkEventDateHasNotPassed(LocalDate eventDate){

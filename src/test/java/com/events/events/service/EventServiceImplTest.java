@@ -54,11 +54,11 @@ public class EventServiceImplTest {
     private Event beach = new Event("Beach", "Entebbe", LocalDate.now().plusDays(3), samuel);
     @Before
     public void setup(){
-        Mockito.when(userRepository.findById(new Integer(1))).thenReturn(Optional.of(male));
-        Mockito.when(eventRepository.findById(new Integer(1))).thenReturn(Optional.of(cinemaMovie));
-        Mockito.when(eventRepository.findById(new Integer(2))).thenReturn(Optional.of(beach));
-        Mockito.when(userRepository.findById(new Integer(23))).thenReturn(Optional.empty());
-        Mockito.when(eventRepository.findById(new Integer(12))).thenReturn(Optional.empty());
+        Mockito.when(userRepository.findById(1)).thenReturn(Optional.of(male));
+        Mockito.when(eventRepository.findById(1)).thenReturn(Optional.of(cinemaMovie));
+        Mockito.when(eventRepository.findById(2)).thenReturn(Optional.of(beach));
+        Mockito.when(userRepository.findById(23)).thenReturn(Optional.empty());
+        Mockito.when(eventRepository.findById(12)).thenReturn(Optional.empty());
     }
 
     @Test
@@ -199,7 +199,7 @@ public class EventServiceImplTest {
 
         Assert.assertEquals(returnedEvent, beach);
         Assert.assertEquals(returnedEvent.getParticipants().size(), 2);
-        Assert.assertEquals(returnedEvent.getParticipants().get(0), male);
-        Assert.assertEquals(returnedEvent.getParticipants().get(1), user1);
+        Assert.assertEquals(returnedEvent.getParticipants().get(0), user1);
+        Assert.assertEquals(returnedEvent.getParticipants().get(1), male);
     }
 }
