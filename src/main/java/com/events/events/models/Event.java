@@ -1,6 +1,5 @@
 package com.events.events.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.data.annotation.CreatedDate;
@@ -60,6 +59,9 @@ public class Event {
     @LastModifiedDate
     @JsonView(Views.EventExtended.class)
     private LocalDate updatedAt;
+
+    @JsonView(Views.Summarised.class)
+    private EventStatus eventStatus = EventStatus.OPEN;
 
     public Event(){
         this.participants = new ArrayList<>();
@@ -161,5 +163,13 @@ public class Event {
 
     public void setCost(Currency cost) {
         this.cost = cost;
+    }
+
+    public EventStatus getEventStatus() {
+        return eventStatus;
+    }
+
+    public void setEventStatus(EventStatus eventStatus) {
+        this.eventStatus = eventStatus;
     }
 }

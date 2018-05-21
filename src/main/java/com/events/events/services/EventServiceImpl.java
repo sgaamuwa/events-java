@@ -44,6 +44,7 @@ public class EventServiceImpl implements EventService {
             throw new UsernameNotFoundException("User with username: "+username+" does not exist");
         }
         event.setCreator(user.get());
+        checkUserDoesNotHaveEventOnSameDay(user.get(), event.getDate());
         return saveEvent(event);
     }
 
@@ -101,6 +102,10 @@ public class EventServiceImpl implements EventService {
             throw new InvalidDateException("The date to add participants is passed");
         }
 
+        for(User user : users){
+            checkUserDoesNotHaveEventOnSameDay(user, event.getDate());
+        }
+
         List<User> newParticipantsList = (List<User>) CollectionUtils.union(event.getParticipants(), users);
         event.setParticipants(newParticipantsList);
 
@@ -124,6 +129,7 @@ public class EventServiceImpl implements EventService {
             event.setParticipants(participants);
         }
         else if(!event.getParticipants().stream().anyMatch(participant -> participant.equals(user))){
+            checkUserDoesNotHaveEventOnSameDay(user, event.getDate());
             List<User> participants = event.getParticipants();
             participants.add(user);
             event.setParticipants(participants);
@@ -192,5 +198,20 @@ public class EventServiceImpl implements EventService {
             return false;
         }
         return true;
+    }
+
+    private void checkUserDoesNotHaveEventOnSameDay(User user, LocalDate date){
+        // check that they do not have an event created for that day
+        for(Event event : user.getCreatedEvents()){
+            if(event.getDate().equals(date)){
+                throw new InvalidDateException("User has an event scheduled for this day");
+            }
+        }
+        // check that they are not attending an event that day
+        for(Event event : user.getAttending()){
+            if(event.getDate().equals(date)){
+                throw new InvalidDateException("User is already attending an event on this day");
+            }
+        }
     }
 }
