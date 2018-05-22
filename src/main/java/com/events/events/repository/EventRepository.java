@@ -2,6 +2,8 @@ package com.events.events.repository;
 
 import com.events.events.models.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
@@ -9,7 +11,16 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface EventRepository extends JpaRepository<Event, Integer>, EventRepositoryCustom {
+public interface EventRepository extends JpaRepository<Event, Integer>{
 
     List<Event> findByDate(LocalDate date);
+
+    @Query(value = "SELECT * FROM events e WHERE e.date >= :date", nativeQuery = true)
+    List<Event> getEventsAfterDate(@Param("date") LocalDate date);
+
+    @Query(value = "SELECT * FROM events e WHERE e.date <= :date", nativeQuery = true)
+    List<Event> getEventsBeforeDate(@Param("date") LocalDate date);
+
+    @Query(value = "SELECT * FROM events e WHERE e.date BETWEEN :dateFrom AND :dateTo", nativeQuery = true)
+    List<Event> getEventsBetweenDates(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo);
 }
