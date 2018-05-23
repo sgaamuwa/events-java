@@ -5,6 +5,7 @@ import com.events.events.error.DuplicateCreationException;
 import com.events.events.error.EmptyListException;
 import com.events.events.error.InvalidDateException;
 import com.events.events.models.Event;
+import com.events.events.models.EventStatus;
 import com.events.events.models.User;
 import com.events.events.repository.EventRepository;
 import com.events.events.repository.UserRepository;
@@ -160,6 +161,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public List<Event> getEventsAfterDate(LocalDate date) {
         List<Event> events = eventRepository.getEventsAfterDate(date);
         if(events.isEmpty()){
@@ -169,12 +171,21 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public List<Event> getEventsBeforeDate(LocalDate date) {
         List<Event> events = eventRepository.getEventsBeforeDate(date);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events before the date: "+ date);
         }
         return events;
+    }
+
+    @Override
+    @Transactional
+    public void cancelEvent(int eventId) {
+        Event event = verifyAndReturnEvent(eventId);
+        event.setEventStatus(EventStatus.CANCELLED);
+        eventRepository.save(event);
     }
 
     private Event verifyAndReturnEvent(int eventId){
@@ -203,13 +214,13 @@ public class EventServiceImpl implements EventService {
     private void checkUserDoesNotHaveEventOnSameDay(User user, LocalDate date){
         // check that they do not have an event created for that day
         for(Event event : user.getCreatedEvents()){
-            if(event.getDate().equals(date)){
+            if(event.getDate().equals(date) && event.getEventStatus() != EventStatus.CANCELLED){
                 throw new InvalidDateException("User has an event scheduled for this day");
             }
         }
         // check that they are not attending an event that day
         for(Event event : user.getAttending()){
-            if(event.getDate().equals(date)){
+            if(event.getDate().equals(date) && event.getEventStatus() != EventStatus.CANCELLED){
                 throw new InvalidDateException("User is already attending an event on this day");
             }
         }

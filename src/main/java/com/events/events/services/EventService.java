@@ -74,4 +74,10 @@ public interface EventService {
     List<Event> getEventsAfterDate(LocalDate date);
     List<Event> getEventsBeforeDate(LocalDate date);
 
+    /**
+     * This is a method to cancel an event by the user
+     * @param eventId
+     */
+    void cancelEvent(int eventId);
+
 }
