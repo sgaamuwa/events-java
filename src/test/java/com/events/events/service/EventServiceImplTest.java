@@ -4,6 +4,7 @@ import com.events.events.error.DuplicateCreationException;
 import com.events.events.error.InvalidDateException;
 import com.events.events.error.NotFoundException;
 import com.events.events.models.Event;
+import com.events.events.models.EventStatus;
 import com.events.events.models.User;
 import com.events.events.repository.EventRepository;
 import com.events.events.repository.UserRepository;
@@ -48,8 +49,8 @@ public class EventServiceImplTest {
     @MockBean
     private UserRepository userRepository;
 
-    private User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123");
-    private User male = new User("michael", "male", "mmale", "pass123");
+    private User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123", "sgaamuwa@email.com");
+    private User male = new User("michael", "male", "mmale", "pass123", "mmale@email.com");
     private Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now().plusDays(3), samuel);
     private Event beach = new Event("Beach", "Entebbe", LocalDate.now().plusDays(3), samuel);
     @Before
@@ -199,7 +200,59 @@ public class EventServiceImplTest {
 
         Assert.assertEquals(returnedEvent, beach);
         Assert.assertEquals(returnedEvent.getParticipants().size(), 2);
-        Assert.assertEquals(returnedEvent.getParticipants().get(0), user1);
-        Assert.assertEquals(returnedEvent.getParticipants().get(1), male);
+    }
+
+    @Test
+    public void testCanCancelEvent(){
+        Assert.assertEquals(cinemaMovie.getEventStatus(), EventStatus.OPEN);
+        eventService.cancelEvent(1);
+        ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);
+        Mockito.verify(eventRepository, Mockito.atMost(1)).save(argument.capture());
+        Assert.assertEquals(argument.getValue().getEventStatus(), EventStatus.CANCELLED);
+        Assert.assertEquals(cinemaMovie.getEventStatus(), EventStatus.CANCELLED);
+    }
+
+    @Test
+    public void testCantAddUserToEventOnSameDayWithCreatedEvent(){
+        male.setCreatedEvents(new ArrayList<>(Arrays.asList(cinemaMovie)));
+        Event newEvent = new Event("event", "Mityana", LocalDate.now().plusDays(3), samuel);
+        Mockito.when(eventRepository.findById(56)).thenReturn(Optional.of(newEvent));
+        Throwable exception = assertThrows(InvalidDateException.class, () -> {
+            eventService.addSingleParticipantToEvent(56,1);
+        });
+        Assert.assertEquals("User has an event scheduled for this day", exception.getMessage());
+    }
+
+    @Test
+    public void testCantAddUserToEventOnSameDayWithAttendingEvent(){
+        male.setAttending(new ArrayList<>(Arrays.asList(cinemaMovie)));
+        Event newEvent = new Event("event", "Mityana", LocalDate.now().plusDays(3), samuel);
+        Mockito.when(eventRepository.findById(56)).thenReturn(Optional.of(newEvent));
+        Throwable exception = assertThrows(InvalidDateException.class, () -> {
+            eventService.addSingleParticipantToEvent(56,1);
+        });
+        Assert.assertEquals("User is already attending an event on this day", exception.getMessage());
+    }
+
+    @Test
+    public void testCantAddUserToCancelledEvent(){
+        Event newEvent = new Event("event", "Mityana", LocalDate.now().plusDays(3), samuel);
+        newEvent.setEventStatus(EventStatus.CANCELLED);
+        Mockito.when(eventRepository.findById(56)).thenReturn(Optional.of(newEvent));
+        Throwable exception = assertThrows(InvalidDateException.class, () -> {
+            eventService.addSingleParticipantToEvent(56,1);
+        });
+        Assert.assertEquals("The event is not open", exception.getMessage());
+    }
+
+    @Test
+    public void testCantAddUserToClosedEvent(){
+        Event newEvent = new Event("event", "Mityana", LocalDate.now().plusDays(3), samuel);
+        newEvent.setEventStatus(EventStatus.CLOSED);
+        Mockito.when(eventRepository.findById(56)).thenReturn(Optional.of(newEvent));
+        Throwable exception = assertThrows(InvalidDateException.class, () -> {
+            eventService.addSingleParticipantToEvent(56,1);
+        });
+        Assert.assertEquals("The event is not open", exception.getMessage());
     }
 }
