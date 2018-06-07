@@ -25,7 +25,7 @@ public class UserRepositoryTest {
 
     @Test
     public void testFindByUsername(){
-        User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123");
+        User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123", "sgaamuwa@email.com");
         entityManager.persist(samuel);
         entityManager.flush();
 
