@@ -99,10 +99,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findById(eventId).get();
 
         // check that the event date has not passed
-        if(!checkEventDateHasNotPassed(event.getDate())){
-            throw new InvalidDateException("The date to add participants is passed");
-        }
-
+        checkEventDateHasNotPassedAndEventIsOpen(event);
         for(User user : users){
             checkUserDoesNotHaveEventOnSameDay(user, event.getDate());
         }
@@ -120,9 +117,8 @@ public class EventServiceImpl implements EventService {
         User user = verifyAndReturnUser(userId);
         Event event = verifyAndReturnEvent(eventId);
         // check that the event date has not passed
-        if(!checkEventDateHasNotPassed(event.getDate())){
-            throw new InvalidDateException("The date to add participants is passed");
-        }
+        checkEventDateHasNotPassedAndEventIsOpen(event);
+        checkUserDoesNotHaveEventOnSameDay(user, event.getDate());
         // check that the user does not exist in the
         if(event.getParticipants().isEmpty()){
             List<User> participants = event.getParticipants();
@@ -130,7 +126,6 @@ public class EventServiceImpl implements EventService {
             event.setParticipants(participants);
         }
         else if(!event.getParticipants().stream().anyMatch(participant -> participant.equals(user))){
-            checkUserDoesNotHaveEventOnSameDay(user, event.getDate());
             List<User> participants = event.getParticipants();
             participants.add(user);
             event.setParticipants(participants);
@@ -184,7 +179,11 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public void cancelEvent(int eventId) {
         Event event = verifyAndReturnEvent(eventId);
-        event.setEventStatus(EventStatus.CANCELLED);
+        if(event.getEventStatus() == EventStatus.OPEN){
+            event.setEventStatus(EventStatus.CANCELLED);
+        }else{
+            throw new DuplicateCreationException("Can only cancel OPEN events");
+        }
         eventRepository.save(event);
     }
 
@@ -204,11 +203,13 @@ public class EventServiceImpl implements EventService {
         return user.get();
     }
 
-    private boolean checkEventDateHasNotPassed(LocalDate eventDate){
-        if(LocalDate.now().isAfter(eventDate.minusDays(1))){
-            return false;
+    private void checkEventDateHasNotPassedAndEventIsOpen(Event event){
+        if(event.getEventStatus() != EventStatus.OPEN){
+            throw new InvalidDateException("The event is not open");
         }
-        return true;
+        if(LocalDate.now().isAfter(event.getDate().minusDays(1))){
+            throw new InvalidDateException("The date to add participants is passed");
+        }
     }
 
     private void checkUserDoesNotHaveEventOnSameDay(User user, LocalDate date){
