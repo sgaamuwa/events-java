@@ -53,8 +53,8 @@ public class UserServiceImplTest {
     @MockBean
     private UserRepository userRepository;
 
-    private User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123");
-    private User joy = new User("joy", "bawaya", "sgaamuwa", "pass123");
+    private User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123", "sgaamuwa@email.com");
+    private User joy = new User("joy", "bawaya", "sgaamuwa", "pass123", "jbawaya@email.com");
 
     @Before
     public void setup(){

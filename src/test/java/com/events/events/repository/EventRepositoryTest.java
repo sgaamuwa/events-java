@@ -1,6 +1,7 @@
 package com.events.events.repository;
 
 import com.events.events.models.Event;
+import com.events.events.models.EventStatus;
 import com.events.events.models.User;
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,10 +27,10 @@ public class EventRepositoryTest {
     @Autowired
     private EventRepository eventRepository;
 
-    private User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123");
+    private User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123", "sgaamuwa@email.com");
     private Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now(), samuel);
-    private User male = new User("michael", "male", "mmale", "pass123");
-    private User bruce = new User("bruce", "bigirwenyka", "bbigirwenkya", "pass123");
+    private User male = new User("michael", "male", "mmale", "pass123", "mmale@email.com");
+    private User bruce = new User("bruce", "bigirwenyka", "bbigirwenkya", "pass123", "bbigirwenkya@email.com");
 
     @Test
     public void canAddUsersToAnEvent(){
@@ -105,6 +106,24 @@ public class EventRepositoryTest {
         Assert.assertEquals(eventRepository.getEventsBeforeDate(LocalDate.now().plusDays(1)).size(), 1);
         Assert.assertEquals(eventRepository.getEventsBeforeDate(LocalDate.now().minusDays(1)).size(), 0);
         Assert.assertEquals(eventRepository.getEventsBeforeDate(LocalDate.now().plusDays(4)).size(), 3);
+    }
+
+    @Test
+    public void canFindEventsByStatus(){
+        Event beach = new Event("beach", "Entebbe", LocalDate.now().plusDays(2), samuel);
+        Event jumping = new Event("jumping", "Jinja", LocalDate.now().plusDays(3), samuel);
+        Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now(), samuel);
+
+        beach.setEventStatus(EventStatus.CANCELLED);
+
+        entityManager.persist(samuel);
+        entityManager.persist(beach);
+        entityManager.persist(jumping);
+        entityManager.persist(cinemaMovie);
+
+        Assert.assertEquals(eventRepository.findByEventStatus(EventStatus.OPEN).size(), 2);
+        Assert.assertEquals(eventRepository.findByEventStatus(EventStatus.CANCELLED).size(), 1);
+        Assert.assertEquals(eventRepository.findByEventStatus(EventStatus.CANCELLED).get(0), beach);
     }
 
 }
