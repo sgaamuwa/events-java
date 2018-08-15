@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.social.facebook.api.Facebook;
+import org.springframework.social.facebook.api.impl.FacebookTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -102,6 +104,13 @@ public class UserServiceImpl implements UserService {
             throw new EmptyListException("The user: "+userId+" is not attending any events");
         }
         return user.getAttending();
+    }
+
+    @Override
+    public String facebookUserName() {
+        Facebook facebook = new FacebookTemplate("EAAFO9ZCCXJuMBAIkYojNtQ6FG4ZCNSrv3M8Fy7s0ywuBFuJDe9HRKGl0JK0qeyT1aMLs0QYKslGo83eWwBleGrHxIlIL2BK1lYwcauG2U5vDP051KTIZCN9l7ZBO8TWxQResuznQ2x1kh13sAUsZCIEs39oePHcMzHJ4Kj2Nxmw53o3H5k8LoAzZCx3WEJEdvW6SY2LZBpWkZBnUbOhcjJZBGI6blUOJZAmbHEznYBW4TVrXZBTIoZCiGQzg");
+        String[] fields = {"id", "email", "first_name", "last_name"};
+        return facebook.fetchObject("me", org.springframework.social.facebook.api.User.class, fields).getEmail();
     }
 
     private User verifyAndReturnUser(int userId){

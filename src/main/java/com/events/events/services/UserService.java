@@ -15,5 +15,6 @@ public interface UserService extends UserDetailsService {
     void changePassword(int userId, String oldPassword, String newPassword);
     List<Event> listEventsByUser(int userId);
     List<Event> listEventsUserIsAttending(int userId);
+    String facebookUserName();
 
 }

@@ -7,9 +7,12 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.social.connect.ConnectionRepository;
+import org.springframework.social.facebook.api.Facebook;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.inject.Inject;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -46,6 +49,11 @@ public class UserController {
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public void deleteUserById(@PathVariable("id") int id){
         userService.deleteUser(id);
+    }
+
+    @RequestMapping(value = "/facebook", method = RequestMethod.GET)
+    public String getFacebookUserName(){
+        return userService.facebookUserName();
     }
 
 }
