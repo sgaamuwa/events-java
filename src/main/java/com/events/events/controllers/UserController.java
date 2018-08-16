@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -51,9 +53,10 @@ public class UserController {
         userService.deleteUser(id);
     }
 
-    @RequestMapping(value = "/facebook", method = RequestMethod.GET)
-    public String getFacebookUserName(){
-        return userService.facebookUserName();
+    @RequestMapping(value = "/facebook/setToken", method = RequestMethod.POST)
+    public ResponseEntity<String> setFacebookAccessToken(@RequestBody Map<String, String> payload, Principal principal){
+        userService.setFacebookIdAndToken(payload.get("token"), principal.getName());
+        return new ResponseEntity<>("Token for the user was set", HttpStatus.OK);
     }
 
 }
