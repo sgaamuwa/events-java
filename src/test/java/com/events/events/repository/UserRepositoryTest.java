@@ -39,32 +39,32 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void testGetUserIdUsingLastName(){
+    public void testGetUserIdUsingFacebookIds(){
         User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123", "sgaamuwa@email.com");
         User edward = new User("edward", "gaamuwa", "egaamuwa", "pass123", "egaamuwa@email.com");
         User david = new User("david", "gaamuwa", "dgaamuwa", "pass123", "dgaamuwa@email.com");
         User merab = new User("merab", "kawanguzi", "mkawanguzi", "pass123", "mkawanguzi@email.com");
-        User joy = new User("joy", "bawaya", "jbawaya", "pass123", "jbawaya@email.com");
+
+        samuel.setFacebookId("12345");
+        edward.setFacebookId("21435");
+        david.setFacebookId("54321");
+        merab.setFacebookId("45231");
 
         Integer samId = entityManager.persistAndGetId(samuel, Integer.class);
         Integer edwardId = entityManager.persistAndGetId(edward, Integer.class);
         Integer davidId = entityManager.persistAndGetId(david, Integer.class);
         Integer merabId = entityManager.persistAndGetId(merab, Integer.class);
-        Integer joyId = entityManager.persistAndGetId(joy, Integer.class);
         entityManager.flush();
 
-        List<Integer> gaamuwaIds = Arrays.asList(samId, edwardId, davidId);
-        List<Integer> nonGaamuwaIds = Arrays.asList(merabId, joyId);
+        List<Integer> singleId = Arrays.asList(samId);
+        List<Integer> multipleIds = Arrays.asList(samId, edwardId, davidId, merabId);
 
-        List<Integer> userIds = userRepository.getUserIdsForLastNames(Arrays.asList("gaamuwa", "bawaya"));
-        List<Integer> userIds2 = userRepository.getUserIdsForLastNames(Arrays.asList("gaamuwa"));
-        List<Integer> userIds3 = userRepository.getUserIdsForLastNames(Arrays.asList("gaamuwa", "bawaya", "kawanguzi"));
+        List<String> userIds = userRepository.getUserIdsForUsersWithFacebookIds(Arrays.asList("12345"));
+        List<String> userIds2 = userRepository.getUserIdsForUsersWithFacebookIds(Arrays.asList("12345", "21435", "54321", "45231"));
 
-        Assert.assertEquals(userIds.size(), 4);
-        Assert.assertEquals(userIds2.size(), 3);
-        Assert.assertEquals(userIds3.size(), 5);
-        Assert.assertEquals(new HashSet<>(gaamuwaIds), new HashSet<>(userRepository.getUserIdsForLastNames(Arrays.asList("gaamuwa"))));
-        Assert.assertEquals(new HashSet<>(nonGaamuwaIds), new HashSet<>(userRepository.getUserIdsForLastNames(Arrays.asList("bawaya", "kawanguzi"))));
-
+        Assert.assertEquals(userIds.size(), 1);
+        Assert.assertEquals(userIds2.size(), 4);
+        Assert.assertEquals(new HashSet<>(singleId), new HashSet<>(userIds));
+        Assert.assertEquals(new HashSet<>(multipleIds), new HashSet<>(userIds2));
     }
 }

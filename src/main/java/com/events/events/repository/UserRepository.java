@@ -14,7 +14,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     Optional<User> findByUsername(String username);
 
-    @Query(value = "SELECT id FROM users u WHERE u.last_Name IN (:lastNames)", nativeQuery = true)
-    List<Integer> getUserIdsForLastNames(@Param("lastNames") List<String> lastNames);
+    @Query(value = "SELECT id FROM users u WHERE u.facebook_id IN (:facebookIds)", nativeQuery = true)
+    List<String> getUserIdsForUsersWithFacebookIds(@Param("facebookIds") List<String> facebookIds);
 
 }
