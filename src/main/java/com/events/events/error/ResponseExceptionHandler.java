@@ -37,7 +37,7 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    protected ResponseEntity handleAuthenticationException(RuntimeException e, WebRequest request){
+    protected ResponseEntity<Object> handleAuthenticationException(RuntimeException e, WebRequest request){
         CustomErrorMessage customErrorMessage = new CustomErrorMessage(HttpStatus.BAD_REQUEST, e.getMessage(), e.getCause().toString());
         return handleExceptionInternal(e, customErrorMessage, new HttpHeaders(), customErrorMessage.getStatus(), request);
     }

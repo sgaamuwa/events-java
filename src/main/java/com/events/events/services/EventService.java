@@ -79,5 +79,6 @@ public interface EventService {
      * @param eventId
      */
     void cancelEvent(int eventId);
+    void sendEmail();
 
 }

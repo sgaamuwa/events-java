@@ -11,6 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.social.ExpiredAuthorizationException;
+import org.springframework.social.InvalidAuthorizationException;
+import org.springframework.social.facebook.api.Facebook;
+import org.springframework.social.facebook.api.impl.FacebookTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -102,6 +106,26 @@ public class UserServiceImpl implements UserService {
             throw new EmptyListException("The user: "+userId+" is not attending any events");
         }
         return user.getAttending();
+    }
+
+    @Override
+    public void setFacebookIdAndToken(String token, String username) {
+        //check that the token received is valid and belongs to the user
+        try {
+            Facebook facebook = new FacebookTemplate(token);
+            String[] fields = {"id", "email", "first_name", "last_name"};
+            org.springframework.social.facebook.api.User facebookUser = facebook.fetchObject("me", org.springframework.social.facebook.api.User.class, fields);
+            // get the user and set the token and facebook Id
+            User user = userRepository.findByUsername(username).get();
+            user.setFacebookId(facebookUser.getId());
+            user.setAccessToken(token);
+        }catch(InvalidAuthorizationException e){
+            throw new AuthenticationException("Facebook token provided is invalid");
+        }catch(ExpiredAuthorizationException e){
+            throw new AuthenticationException("Facebook token provided is expired");
+        }
+        System.out.println("Got here");
+
     }
 
     private User verifyAndReturnUser(int userId){

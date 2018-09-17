@@ -7,11 +7,16 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.social.connect.ConnectionRepository;
+import org.springframework.social.facebook.api.Facebook;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.inject.Inject;
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -46,6 +51,12 @@ public class UserController {
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public void deleteUserById(@PathVariable("id") int id){
         userService.deleteUser(id);
+    }
+
+    @RequestMapping(value = "/facebook/setToken", method = RequestMethod.POST)
+    public ResponseEntity<String> setFacebookAccessToken(@RequestBody Map<String, String> payload, Principal principal){
+        userService.setFacebookIdAndToken(payload.get("token"), principal.getName());
+        return new ResponseEntity<>("Token for the user was set", HttpStatus.OK);
     }
 
 }

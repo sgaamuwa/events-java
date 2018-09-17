@@ -12,6 +12,8 @@ import com.events.events.repository.UserRepository;
 import com.events.events.error.NotFoundException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,9 @@ public class EventServiceImpl implements EventService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JavaMailSender javaMailSender;
 
     @Override
     @Transactional
@@ -185,6 +190,15 @@ public class EventServiceImpl implements EventService {
             throw new DuplicateCreationException("Can only cancel OPEN events");
         }
         eventRepository.save(event);
+    }
+
+    @Override
+    public void sendEmail() {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo("sgaamuwa@gmail.com");
+        message.setSubject("bla bla bla");
+        message.setText("no no no");
+        javaMailSender.send(message);
     }
 
     private Event verifyAndReturnEvent(int eventId){

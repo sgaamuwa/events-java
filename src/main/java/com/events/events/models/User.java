@@ -47,6 +47,10 @@ public class User {
     @JsonView(Views.Summarised.class)
     private String email;
 
+    private String accessToken;
+
+    private String facebookId;
+
     @Column(nullable = false, updatable = false)
     @CreatedDate
     @JsonView(Views.UserExtended.class)
@@ -138,6 +142,24 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    @JsonIgnore
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    @JsonIgnore
+    public String getFacebookId() {
+        return facebookId;
+    }
+
+    public void setFacebookId(String facebookId) {
+        this.facebookId = facebookId;
     }
 
     public List<Event> getCreatedEvents() {
