@@ -2,6 +2,7 @@ package com.events.events.service;
 
 import com.events.events.error.AuthenticationException;
 import com.events.events.error.DuplicateCreationException;
+import com.events.events.error.IllegalFriendActionException;
 import com.events.events.error.NotFoundException;
 import com.events.events.models.User;
 import com.events.events.repository.UserRepository;
@@ -181,6 +182,26 @@ public class UserServiceImplTest {
         Assert.assertEquals("New Password must be more than 5", exception.getMessage());
         Mockito.verify(userRepository, Mockito.never()).save(Mockito.any(User.class));
     }
+
+    @Test
+    public void testAddsFriendWithValidId() throws InterruptedException{
+        joy.setId(2);
+        Mockito.when(userRepository.findById(2)).thenReturn(Optional.of(joy));
+        userService.addFriend(1,2);
+        Assert.assertEquals(samuel.getFriends().size(), 1);
+
+        Thread.sleep(2000);
+    }
+
+    @Test
+    public void testThrowsIllegalFriendActionExceptionIfUserAndFriendTheSame(){
+        Mockito.when(userRepository.findById(2)).thenReturn(Optional.of(joy));
+        Throwable exception = assertThrows(IllegalFriendActionException.class, () -> {
+            userService.addFriend(1, 2);
+        });
+        Assert.assertEquals("Can't add self as a friend", exception.getMessage());
+    }
+
 
 
 }

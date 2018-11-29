@@ -42,6 +42,13 @@ public interface UserService extends UserDetailsService {
      */
     void changePassword(int userId, String oldPassword, String newPassword);
 
+    /**
+     * This method is used to add a friend to user
+     * @param userId
+     * @param friendId
+     */
+    void addFriend(int userId, int friendId);
+
     List<Event> listEventsByUser(int userId);
     List<Event> listEventsUserIsAttending(int userId);
 
