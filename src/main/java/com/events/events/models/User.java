@@ -1,10 +1,7 @@
 package com.events.events.models;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -16,6 +13,7 @@ import javax.validation.constraints.Size;
 import java.util.Collections;
 import java.util.List;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -72,9 +70,13 @@ public class User {
     @JsonView(Views.UserExtended.class)
     private List<Event> attending;
 
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Friend> friends;
+
     public User(){
         this.createdEvents = Collections.emptyList();
         this.attending = Collections.emptyList();
+        this.friends = Collections.emptySet();
     }
 
     public User(String username, String password){
@@ -178,11 +180,34 @@ public class User {
         this.attending = attending;
     }
 
+    public Set<Friend> getFriends() {
+        return friends;
+    }
+
+    public void setFriends(Set<Friend> friends) {
+        this.friends = friends;
+    }
+
     public LocalDate getCreatedAt(){
         return createdAt;
     }
 
     public LocalDate getUpdatedAt(){
         return updatedAt;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == this){
+            return true;
+        }
+        if(obj == null){
+            return false;
+        }
+        if(!(obj instanceof User)){
+            return false;
+        }
+
+        return Integer.compare(id, ((User) obj).id) == 0 && username.equals(((User) obj).username);
     }
 }

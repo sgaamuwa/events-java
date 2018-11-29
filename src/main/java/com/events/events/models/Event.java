@@ -22,32 +22,25 @@ public class Event {
 
     @Id
     @GeneratedValue
-    @JsonView(Views.Summarised.class)
     private int id;
 
     @Column(nullable = false)
-    @JsonView(Views.Summarised.class)
     private String title;
 
-    @JsonView(Views.Summarised.class)
     private String location;
 
-    @JsonView(Views.Summarised.class)
     private URL link;
 
-    @JsonView(Views.Summarised.class)
     private LocalDate date;
 
-    @JsonView(Views.EventExtended.class)
     private Currency cost;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonView(Views.EventExtended.class)
+    @JsonIgnoreProperties({"createdEvents", "attending", "createdAt", "updatedAt"})
     private User creator;
 
     @ManyToMany(mappedBy = "attending")
-    @JsonView(Views.EventExtended.class)
     private List<User> participants;
 
     @Column(nullable = false, updatable = false)
@@ -171,5 +164,20 @@ public class Event {
 
     public void setEventStatus(EventStatus eventStatus) {
         this.eventStatus = eventStatus;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == this){
+            return true;
+        }
+        if(obj == null){
+            return false;
+        }
+        if(!(obj instanceof Event)){
+            return false;
+        }
+
+        return Integer.compare(id, ((Event) obj).id) == 0;
     }
 }
