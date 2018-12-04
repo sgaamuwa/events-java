@@ -1,10 +1,8 @@
 package com.events.events.services;
 
-import com.events.events.error.AuthenticationException;
-import com.events.events.error.DuplicateCreationException;
-import com.events.events.error.EmptyListException;
-import com.events.events.error.NotFoundException;
+import com.events.events.error.*;
 import com.events.events.models.Event;
+import com.events.events.models.Friend;
 import com.events.events.models.User;
 import com.events.events.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +16,7 @@ import org.springframework.social.facebook.api.impl.FacebookTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -86,6 +82,38 @@ public class UserServiceImpl implements UserService {
         }
         user.setPassword(bCryptPasswordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void addFriend(int userId, int friendId) {
+        User user = verifyAndReturnUser(userId);
+        User friend = verifyAndReturnUser(friendId);
+        // create the friend
+        if(user.equals(friend)){
+            throw new IllegalFriendActionException("Can't add self as a friend");
+        }
+        Friend newFriend = new Friend(user, friend);
+        // add the friend to the user
+        Set<Friend> newFriendsSet;
+        if(user.getFriends().isEmpty()){
+            newFriendsSet = new HashSet<>();
+        }else{
+            newFriendsSet = user.getFriends();
+        }
+        newFriendsSet.add(newFriend);
+        user.setFriends(newFriendsSet);
+        userRepository.save(user);
+    }
+
+    @Override
+    public List<User> getAllFriends(int userId) {
+        User user = verifyAndReturnUser(userId);
+        List<User> friends = new ArrayList<>();
+        for(Friend friend : user.getFriends()){
+            friends.add(friend.getFriend());
+        }
+        return friends;
     }
 
     @Override
