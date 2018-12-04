@@ -1,7 +1,6 @@
 package com.events.events.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -45,15 +44,12 @@ public class Event {
 
     @Column(nullable = false, updatable = false)
     @CreatedDate
-    @JsonView(Views.EventExtended.class)
     private LocalDate createdAt;
 
     @Column(nullable = false)
     @LastModifiedDate
-    @JsonView(Views.EventExtended.class)
     private LocalDate updatedAt;
 
-    @JsonView(Views.Summarised.class)
     private EventStatus eventStatus = EventStatus.OPEN;
 
     public Event(){

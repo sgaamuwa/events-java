@@ -24,16 +24,12 @@ public class User {
 
     @Id
     @GeneratedValue
-    @JsonView(Views.Summarised.class)
     private int id;
 
-    @JsonView(Views.Summarised.class)
     private String firstName;
 
-    @JsonView(Views.Summarised.class)
     private String lastName;
 
-    @JsonView(Views.Summarised.class)
     @NotEmpty(message = "Username is required")
     private String username;
 
@@ -42,7 +38,6 @@ public class User {
     private String password;
 
     @Email
-    @JsonView(Views.Summarised.class)
     private String email;
 
     private String accessToken;
@@ -51,23 +46,19 @@ public class User {
 
     @Column(nullable = false, updatable = false)
     @CreatedDate
-    @JsonView(Views.UserExtended.class)
     private LocalDate createdAt;
 
     @Column(nullable = false)
     @LastModifiedDate
-    @JsonView(Views.UserExtended.class)
     private LocalDate updatedAt;
 
     @OneToMany(mappedBy = "creator")
-    @JsonView(Views.UserExtended.class)
     private List<Event> createdEvents;
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "user_event",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "event_id", referencedColumnName = "id"))
-    @JsonView(Views.UserExtended.class)
     private List<Event> attending;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -164,6 +155,7 @@ public class User {
         this.facebookId = facebookId;
     }
 
+    @JsonIgnore
     public List<Event> getCreatedEvents() {
         return createdEvents;
     }
@@ -172,6 +164,7 @@ public class User {
         this.createdEvents = createdEvents;
     }
 
+    @JsonIgnore
     public List<Event> getAttending() {
         return attending;
     }
@@ -180,6 +173,7 @@ public class User {
         this.attending = attending;
     }
 
+    @JsonIgnore
     public Set<Friend> getFriends() {
         return friends;
     }

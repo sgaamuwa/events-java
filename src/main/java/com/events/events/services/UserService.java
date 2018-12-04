@@ -49,6 +49,12 @@ public interface UserService extends UserDetailsService {
      */
     void addFriend(int userId, int friendId);
 
+    /**
+     * This method returns all the friends of a user
+     * @param userId
+     */
+    List<User> getAllFriends(int userId);
+
     List<Event> listEventsByUser(int userId);
     List<Event> listEventsUserIsAttending(int userId);
 

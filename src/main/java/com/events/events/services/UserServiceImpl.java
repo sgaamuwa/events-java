@@ -85,6 +85,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void addFriend(int userId, int friendId) {
         User user = verifyAndReturnUser(userId);
         User friend = verifyAndReturnUser(friendId);
@@ -102,6 +103,17 @@ public class UserServiceImpl implements UserService {
         }
         newFriendsSet.add(newFriend);
         user.setFriends(newFriendsSet);
+        userRepository.save(user);
+    }
+
+    @Override
+    public List<User> getAllFriends(int userId) {
+        User user = verifyAndReturnUser(userId);
+        List<User> friends = new ArrayList<>();
+        for(Friend friend : user.getFriends()){
+            friends.add(friend.getFriend());
+        }
+        return friends;
     }
 
     @Override

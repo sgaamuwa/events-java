@@ -184,13 +184,12 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void testAddsFriendWithValidId() throws InterruptedException{
+    public void testAddsFriendWithValidId(){
         joy.setId(2);
         Mockito.when(userRepository.findById(2)).thenReturn(Optional.of(joy));
         userService.addFriend(1,2);
         Assert.assertEquals(samuel.getFriends().size(), 1);
-
-        Thread.sleep(2000);
+        Mockito.verify(userRepository).save(samuel);
     }
 
     @Test
@@ -201,7 +200,5 @@ public class UserServiceImplTest {
         });
         Assert.assertEquals("Can't add self as a friend", exception.getMessage());
     }
-
-
 
 }
