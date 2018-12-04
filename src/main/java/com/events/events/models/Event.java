@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.hateoas.ResourceSupport;
 
 import javax.persistence.*;
 import java.net.URL;
@@ -17,11 +18,11 @@ import java.util.List;
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"},
         allowGetters = true)
 @Table(name = "events")
-public class Event {
+public class Event extends ResourceSupport {
 
     @Id
     @GeneratedValue
-    private int id;
+    private int eventId;
 
     @Column(nullable = false)
     private String title;
@@ -82,12 +83,12 @@ public class Event {
         this.participants = participants;
     }
 
-    public int getId() {
-        return id;
+    public int getEventId() {
+        return eventId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setEventId(int eventId) {
+        this.eventId = eventId;
     }
 
     public String getTitle() {
@@ -174,6 +175,6 @@ public class Event {
             return false;
         }
 
-        return Integer.compare(id, ((Event) obj).id) == 0;
+        return Integer.compare(eventId, ((Event) obj).eventId) == 0;
     }
 }

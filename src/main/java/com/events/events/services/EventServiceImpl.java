@@ -60,7 +60,7 @@ public class EventServiceImpl implements EventService {
         if(!eventRepository.existsById(eventId)){
             throw new NotFoundException("Event with id: "+eventId+" not found");
         }
-        event.setId(eventId);
+        event.setEventId(eventId);
         return eventRepository.save(event);
     }
 

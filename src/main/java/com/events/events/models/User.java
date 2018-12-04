@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.hateoas.ResourceSupport;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -20,11 +21,11 @@ import java.util.Set;
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"},
         allowGetters = true)
 @Table(name = "users")
-public class User {
+public class User extends ResourceSupport {
 
     @Id
     @GeneratedValue
-    private int id;
+    private int userId;
 
     private String firstName;
 
@@ -57,8 +58,8 @@ public class User {
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "user_event",
-            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "event_id", referencedColumnName = "id"))
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "userId"),
+            inverseJoinColumns = @JoinColumn(name = "event_id", referencedColumnName = "eventId"))
     private List<Event> attending;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -87,12 +88,12 @@ public class User {
         this.lastName = lastName;
     }
 
-    public int getId() {
-        return id;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public String getFirstName() {
@@ -202,6 +203,6 @@ public class User {
             return false;
         }
 
-        return Integer.compare(id, ((User) obj).id) == 0 && username.equals(((User) obj).username);
+        return Integer.compare(userId, ((User) obj).userId) == 0 && username.equals(((User) obj).username);
     }
 }
