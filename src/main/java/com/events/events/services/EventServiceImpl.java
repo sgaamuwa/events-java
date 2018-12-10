@@ -60,7 +60,7 @@ public class EventServiceImpl implements EventService {
         if(!eventRepository.existsById(eventId)){
             throw new NotFoundException("Event with id: "+eventId+" not found");
         }
-        event.setId(eventId);
+        event.setEventId(eventId);
         return eventRepository.save(event);
     }
 
@@ -109,7 +109,8 @@ public class EventServiceImpl implements EventService {
             checkUserDoesNotHaveEventOnSameDay(user, event.getDate());
         }
 
-        List<User> newParticipantsList = (List<User>) CollectionUtils.union(event.getParticipants(), users);
+        Set<User> newParticipantsList = event.getParticipants();
+        newParticipantsList.addAll(users);
         event.setParticipants(newParticipantsList);
 
         return eventRepository.save(event);
@@ -124,14 +125,9 @@ public class EventServiceImpl implements EventService {
         // check that the event date has not passed
         checkEventDateHasNotPassedAndEventIsOpen(event);
         checkUserDoesNotHaveEventOnSameDay(user, event.getDate());
-        // check that the user does not exist in the
-        if(event.getParticipants().isEmpty()){
-            List<User> participants = event.getParticipants();
-            participants.add(user);
-            event.setParticipants(participants);
-        }
-        else if(!event.getParticipants().stream().anyMatch(participant -> participant.equals(user))){
-            List<User> participants = event.getParticipants();
+        // check that the user does not exist in the set
+        Set<User> participants = event.getParticipants();
+        if(!participants.contains(user)){
             participants.add(user);
             event.setParticipants(participants);
         }else{

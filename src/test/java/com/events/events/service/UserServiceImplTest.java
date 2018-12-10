@@ -185,7 +185,7 @@ public class UserServiceImplTest {
 
     @Test
     public void testAddsFriendWithValidId(){
-        joy.setId(2);
+        joy.setUserId(2);
         Mockito.when(userRepository.findById(2)).thenReturn(Optional.of(joy));
         userService.addFriend(1,2);
         Assert.assertEquals(samuel.getFriends().size(), 1);

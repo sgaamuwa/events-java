@@ -3,6 +3,7 @@ package com.events.events.controllers;
 import com.events.events.models.User;
 import com.events.events.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,8 @@ import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 @RestController
 @RequestMapping("/users")
@@ -21,6 +24,7 @@ public class UserController {
 
     @RequestMapping(value = "/signup",method = RequestMethod.POST)
     public User registerUser(@Valid @RequestBody User user){
+        user.add(linkTo(UserController.class).withSelfRel());
         return userService.saveUser(user);
     }
 

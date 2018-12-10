@@ -77,7 +77,7 @@ public class EventServiceImplTest {
         Assert.assertEquals(savedEvent.getTitle(), "Movie");
         Assert.assertEquals(savedEvent.getCreator().getFirstName(), "samuel");
         Assert.assertEquals(savedEvent.getParticipants().size(), 1);
-        Assert.assertEquals(savedEvent.getParticipants().get(0).getFirstName(), "michael");
+        Assert.assertTrue(savedEvent.getParticipants().contains(male));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class EventServiceImplTest {
 
     @Test
     public void testAddingParticipantToEventWithParticipant(){
-        beach.setParticipants(new ArrayList<>(Arrays.asList(male)));
+        beach.setParticipants(new HashSet<>(Arrays.asList(male)));
         Throwable exception = assertThrows(DuplicateCreationException.class, () -> {
             eventService.addSingleParticipantToEvent(2, 1);
         });
@@ -188,7 +188,7 @@ public class EventServiceImplTest {
 
     @Test
     public void testAddMultipleParticipantsWithOneAlreadyAttending(){
-        beach.setParticipants(new ArrayList<>(Arrays.asList(male)));
+        beach.setParticipants(new HashSet<>(Arrays.asList(male)));
         User user1 = Mockito.mock(User.class);
         List<User> users = new ArrayList<>(Arrays.asList(male, user1));
 

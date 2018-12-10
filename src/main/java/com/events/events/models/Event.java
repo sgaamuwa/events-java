@@ -4,24 +4,23 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.hateoas.ResourceSupport;
 
 import javax.persistence.*;
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Currency;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"},
         allowGetters = true)
 @Table(name = "events")
-public class Event {
+public class Event extends ResourceSupport {
 
     @Id
     @GeneratedValue
-    private int id;
+    private int eventId;
 
     @Column(nullable = false)
     private String title;
@@ -40,7 +39,7 @@ public class Event {
     private User creator;
 
     @ManyToMany(mappedBy = "attending")
-    private List<User> participants;
+    private Set<User> participants;
 
     @Column(nullable = false, updatable = false)
     @CreatedDate
@@ -53,7 +52,7 @@ public class Event {
     private EventStatus eventStatus = EventStatus.OPEN;
 
     public Event(){
-        this.participants = new ArrayList<>();
+        this.participants = new HashSet<>();
     }
 
     public Event(String title, String location, LocalDate date, User creator) {
@@ -61,7 +60,7 @@ public class Event {
         this.location = location;
         this.date = date;
         this.creator = creator;
-        this.participants = new ArrayList<>();
+        this.participants = new HashSet<>();
     }
 
     public Event(String title, String location, URL link, LocalDate date, User creator) {
@@ -70,10 +69,10 @@ public class Event {
         this.link = link;
         this.date = date;
         this.creator = creator;
-        this.participants = new ArrayList<>();
+        this.participants = new HashSet<>();
     }
 
-    public Event(String title, String location, URL link, LocalDate date, User creator, List<User> participants) {
+    public Event(String title, String location, URL link, LocalDate date, User creator, Set<User> participants) {
         this.title = title;
         this.location = location;
         this.link = link;
@@ -82,12 +81,12 @@ public class Event {
         this.participants = participants;
     }
 
-    public int getId() {
-        return id;
+    public int getEventId() {
+        return eventId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setEventId(int eventId) {
+        this.eventId = eventId;
     }
 
     public String getTitle() {
@@ -130,11 +129,11 @@ public class Event {
         this.date = date;
     }
 
-    public List<User> getParticipants() {
+    public Set<User> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(List<User> participants) {
+    public void setParticipants(Set<User> participants) {
         this.participants = participants;
     }
 
@@ -174,6 +173,6 @@ public class Event {
             return false;
         }
 
-        return Integer.compare(id, ((Event) obj).id) == 0;
+        return Integer.compare(eventId, ((Event) obj).eventId) == 0;
     }
 }
