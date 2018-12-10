@@ -1,7 +1,6 @@
 package com.events.events.repository;
 
 import com.events.events.models.User;
-import com.sun.tools.corba.se.idl.InterfaceGen;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
