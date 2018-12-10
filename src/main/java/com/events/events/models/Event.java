@@ -9,9 +9,7 @@ import org.springframework.hateoas.ResourceSupport;
 import javax.persistence.*;
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Currency;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -41,7 +39,7 @@ public class Event extends ResourceSupport {
     private User creator;
 
     @ManyToMany(mappedBy = "attending")
-    private List<User> participants;
+    private Set<User> participants;
 
     @Column(nullable = false, updatable = false)
     @CreatedDate
@@ -54,7 +52,7 @@ public class Event extends ResourceSupport {
     private EventStatus eventStatus = EventStatus.OPEN;
 
     public Event(){
-        this.participants = new ArrayList<>();
+        this.participants = new HashSet<>();
     }
 
     public Event(String title, String location, LocalDate date, User creator) {
@@ -62,7 +60,7 @@ public class Event extends ResourceSupport {
         this.location = location;
         this.date = date;
         this.creator = creator;
-        this.participants = new ArrayList<>();
+        this.participants = new HashSet<>();
     }
 
     public Event(String title, String location, URL link, LocalDate date, User creator) {
@@ -71,10 +69,10 @@ public class Event extends ResourceSupport {
         this.link = link;
         this.date = date;
         this.creator = creator;
-        this.participants = new ArrayList<>();
+        this.participants = new HashSet<>();
     }
 
-    public Event(String title, String location, URL link, LocalDate date, User creator, List<User> participants) {
+    public Event(String title, String location, URL link, LocalDate date, User creator, Set<User> participants) {
         this.title = title;
         this.location = location;
         this.link = link;
@@ -131,11 +129,11 @@ public class Event extends ResourceSupport {
         this.date = date;
     }
 
-    public List<User> getParticipants() {
+    public Set<User> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(List<User> participants) {
+    public void setParticipants(Set<User> participants) {
         this.participants = participants;
     }
 

@@ -14,7 +14,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -35,7 +37,7 @@ public class EventRepositoryTest {
     @Test
     public void canAddUsersToAnEvent(){
 
-        List<User> participants = new ArrayList<>();
+        Set<User> participants = new HashSet<>();
         participants.add(male);
         participants.add(bruce);
 
@@ -43,10 +45,10 @@ public class EventRepositoryTest {
         // save using the repository
         Event savedEvent = eventRepository.save(cinemaMovie);
 
-        Event returned = entityManager.find(Event.class, savedEvent.getId());
+        Event returned = entityManager.find(Event.class, savedEvent.getEventId());
 
-        Assert.assertEquals(returned.getParticipants().get(0).getFirstName(), "michael");
-        Assert.assertEquals(returned.getParticipants().get(1).getFirstName(), "bruce");
+        Assert.assertTrue(returned.getParticipants().contains(male));
+        Assert.assertTrue(returned.getParticipants().contains(bruce));
     }
 
     @Test
