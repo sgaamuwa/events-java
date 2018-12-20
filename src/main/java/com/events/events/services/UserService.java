@@ -55,6 +55,13 @@ public interface UserService extends UserDetailsService {
      */
     List<User> getAllFriends(int userId);
 
+    /**
+     * This method returns all the users that are following this particular user
+     * @param userId
+     * @return
+     */
+    List<User> getAllFollowers(int userId);
+
     List<Event> listEventsByUser(int userId);
     List<Event> listEventsUserIsAttending(int userId);
 

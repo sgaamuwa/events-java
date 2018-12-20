@@ -4,6 +4,7 @@ import com.events.events.error.*;
 import com.events.events.models.Event;
 import com.events.events.models.Friend;
 import com.events.events.models.User;
+import com.events.events.repository.FriendRepository;
 import com.events.events.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +24,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private FriendRepository friendRepository;
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -114,6 +118,20 @@ public class UserServiceImpl implements UserService {
             friends.add(friend.getFriend());
         }
         return friends;
+    }
+
+    @Override
+    public List<User> getAllFollowers(int userId){
+        User user = verifyAndReturnUser(userId);
+        List<Friend> friendList = friendRepository.getAllFollowers(user.getUserId());
+        List<User> followers = new ArrayList<>();
+        if(friendList.isEmpty()){
+            throw new EmptyListException("There are no followers for the user: "+userId);
+        }
+        for(Friend friend : friendList){
+            followers.add(friend.getOwner());
+        }
+        return followers;
     }
 
     @Override

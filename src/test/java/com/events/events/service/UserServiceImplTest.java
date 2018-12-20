@@ -4,7 +4,9 @@ import com.events.events.error.AuthenticationException;
 import com.events.events.error.DuplicateCreationException;
 import com.events.events.error.IllegalFriendActionException;
 import com.events.events.error.NotFoundException;
+import com.events.events.models.Friend;
 import com.events.events.models.User;
+import com.events.events.repository.FriendRepository;
 import com.events.events.repository.UserRepository;
 import com.events.events.services.UserService;
 import com.events.events.services.UserServiceImpl;
@@ -53,6 +55,10 @@ public class UserServiceImplTest {
 
     @MockBean
     private UserRepository userRepository;
+
+    @MockBean
+    private FriendRepository friendRepository;
+
     private User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123", "sgaamuwa@email.com");
     private User joy = new User("joy", "bawaya", "sgaamuwa", "pass123", "jbawaya@email.com");
 
@@ -199,6 +205,16 @@ public class UserServiceImplTest {
             userService.addFriend(1, 2);
         });
         Assert.assertEquals("Can't add self as a friend", exception.getMessage());
+    }
+
+    @Test
+    public void testCanGetFollowersForUser(){
+        User peace = new User("peace", "nakiyemba", "pnakiyemba", "pass123", "pnakiyemba@email.com");
+        samuel.setUserId(1);
+        List<Friend> friends = Arrays.asList(new Friend(joy, samuel), new Friend(peace, samuel));
+        Mockito.when(friendRepository.getAllFollowers(1)).thenReturn(friends);
+        List<User> friendsList = userService.getAllFollowers(1);
+        Assert.assertEquals(friendsList.size(), 2);
     }
 
 }
