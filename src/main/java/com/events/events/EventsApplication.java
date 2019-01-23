@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication
-@EnableJpaAuditing
+//@EnableJpaAuditing
 @EnableScheduling
 public class EventsApplication {
 
