@@ -36,7 +36,6 @@ public class UserControllerTest {
     private UserService userService;
 
     @Test
-    @WithMockUser
     public void testControllerReturnsUserAfterRegistration() throws Exception{
         User user = new User("sgaamuwa", "password", "sgaamuwa@gmail.com");
         Mockito.when(userService.saveUser(user)).thenReturn(user);
