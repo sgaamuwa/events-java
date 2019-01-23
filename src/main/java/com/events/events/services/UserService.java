@@ -2,9 +2,11 @@ package com.events.events.services;
 
 import com.events.events.models.Event;
 import com.events.events.models.User;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserService extends UserDetailsService {
 
@@ -40,6 +42,7 @@ public interface UserService extends UserDetailsService {
      * @param oldPassword
      * @param newPassword
      */
+    @PreAuthorize("#userId == authentication.principal.id")
     void changePassword(int userId, String oldPassword, String newPassword);
 
     /**
@@ -61,6 +64,14 @@ public interface UserService extends UserDetailsService {
      * @return
      */
     List<User> getAllFollowers(int userId);
+
+    /**
+     * This method takes a map with user input i.e. the information about the follow request and the requester's id
+     * @param userId
+     * @param userInput
+     */
+    void acceptFollowRequest(int userId, Map<String, Object> userInput);
+
 
     List<Event> listEventsByUser(int userId);
     List<Event> listEventsUserIsAttending(int userId);

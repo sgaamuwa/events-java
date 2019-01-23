@@ -6,6 +6,7 @@ import com.events.events.models.Friend;
 import com.events.events.models.User;
 import com.events.events.repository.FriendRepository;
 import com.events.events.repository.UserRepository;
+import javassist.tools.web.BadHttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -132,6 +133,23 @@ public class UserServiceImpl implements UserService {
             followers.add(friend.getOwner());
         }
         return followers;
+    }
+
+    @Override
+    public void acceptFollowRequest(int userId, Map<String, Object> userInput) {
+        //check that the map has the data we are looking for
+        if(!userInput.containsKey("requesterId")){
+            throw new BadRequestException("Please provide a requesterId");
+        }else if(!userInput.containsKey("acceptValue")){
+            throw new BadRequestException("Please provide a acceptValue");
+        }
+        // check that the user and the
+        verifyAndReturnUser(userId);
+        int requesterId = (Integer) userInput.get("requesterId");
+        verifyAndReturnUser(requesterId);
+
+        friendRepository.findById(new Friend.Key(userId, requesterId));
+
     }
 
     @Override

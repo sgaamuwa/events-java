@@ -35,7 +35,7 @@ public class UserController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public User findOneUser(@PathVariable("id") int id ){
+    public User findOneUser(@PathVariable("id") int id, Principal principal ){
         return userService.getUserById(id);
     }
 
@@ -53,6 +53,17 @@ public class UserController {
     public ResponseEntity<String> setFacebookAccessToken(@RequestBody Map<String, String> payload, Principal principal){
         userService.setFacebookIdAndToken(payload.get("token"), principal.getName());
         return new ResponseEntity<>("Token for the user was set", HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{id}/friends/{friendId}", method = RequestMethod.POST)
+    public ResponseEntity<String> addFollower(@PathVariable("id") int id, @PathVariable("friendId") int friendId){
+        userService.addFriend(id, friendId);
+        return new ResponseEntity<>("Follower with user id: "+friendId+" added", HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{id}/followRequests", method = RequestMethod.POST)
+    public ResponseEntity<String> acceptFollowRequest(@PathVariable("id") int id, @RequestBody Map<String, Object> body){
+        return new ResponseEntity<>("The user accepted the follow", HttpStatus.OK);
     }
 
 }

@@ -12,11 +12,9 @@ public class Friend {
     private Key key;
 
     @ManyToOne
-//    @MapsId("ownerId")
     private User owner;
 
     @ManyToOne
-//    @MapsId("friendId")
     private User friend;
 
     private boolean isActive;
@@ -24,6 +22,7 @@ public class Friend {
     public Friend(@NotNull User owner, @NotNull User friend){
         this.owner = owner;
         this.friend = friend;
+        this.isActive = false;
         this.key = new Key(owner.getUserId(), friend.getUserId());
     }
 
