@@ -76,8 +76,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void changePassword(int userId, String oldPassword, String newPassword) {
-        User user = verifyAndReturnUser(userId);
+    public void changePassword(String oldPassword, String newPassword, String username) {
+        User user = verifyAndReturnUser(username);
         if(!bCryptPasswordEncoder.matches(oldPassword, user.getPassword())){
             throw new AuthenticationException("Password does not match current password");
         } else if(bCryptPasswordEncoder.matches(newPassword, user.getPassword())){
@@ -100,15 +100,7 @@ public class UserServiceImpl implements UserService {
         }
         Friend newFriend = new Friend(user, friend);
         // add the friend to the user
-        Set<Friend> newFriendsSet;
-        if(user.getFriends().isEmpty()){
-            newFriendsSet = new HashSet<>();
-        }else{
-            newFriendsSet = user.getFriends();
-        }
-        newFriendsSet.add(newFriend);
-        user.setFriends(newFriendsSet);
-        userRepository.save(user);
+        friendRepository.save(newFriend);
     }
 
     @Override
@@ -192,10 +184,20 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    //Helper methods to get users below here
+
     private User verifyAndReturnUser(int userId){
         Optional<User> user = userRepository.findById(userId);
         if(!user.isPresent()){
             throw new NotFoundException("User with id: "+userId+" not found");
+        }
+        return user.get();
+    }
+
+    private User verifyAndReturnUser(String username){
+        Optional<User> user = userRepository.findByUsername(username);
+        if (!user.isPresent()){
+            throw new NotFoundException("User with the username: "+username+" not found");
         }
         return user.get();
     }

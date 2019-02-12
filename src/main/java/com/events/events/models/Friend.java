@@ -19,6 +19,8 @@ public class Friend {
 
     private boolean isActive;
 
+    public Friend(){};
+
     public Friend(@NotNull User owner, @NotNull User friend){
         this.owner = owner;
         this.friend = friend;
