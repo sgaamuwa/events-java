@@ -28,12 +28,6 @@ public class UserController {
         return userService.saveUser(user);
     }
 
-    @RequestMapping(value = "/{id}/password", method = RequestMethod.POST)
-    public ResponseEntity<String> changeUserPassword(@PathVariable("id") int id, @RequestParam("oldPassword") String oldPassword, @RequestParam("password") String password){
-        userService.changePassword(id, oldPassword, password);
-        return new ResponseEntity<>("Password was changed successfully", HttpStatus.OK);
-    }
-
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public User findOneUser(@PathVariable("id") int id, Principal principal ){
         return userService.getUserById(id);
@@ -61,9 +55,10 @@ public class UserController {
         return new ResponseEntity<>("Follower with user id: "+friendId+" added", HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{id}/followRequests", method = RequestMethod.POST)
-    public ResponseEntity<String> acceptFollowRequest(@PathVariable("id") int id, @RequestBody Map<String, Object> body){
-        return new ResponseEntity<>("The user accepted the follow", HttpStatus.OK);
+    @RequestMapping(value = "/{id}/followers/", method = RequestMethod.GET)
+    public List<User> getUserFriends(@PathVariable("id") int id){
+       return userService.getAllFriends(id);
     }
+
 
 }
