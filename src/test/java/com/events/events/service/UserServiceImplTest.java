@@ -77,6 +77,7 @@ public class UserServiceImplTest {
 
     @Test
     public void testUserServiceSaveHashesPassword(){
+        Mockito.when(userRepository.findByUsername("sgaamuwa")).thenReturn(Optional.empty());
         userService.saveUser(samuel);
         ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
         Mockito.verify(userRepository).save(argument.capture());
