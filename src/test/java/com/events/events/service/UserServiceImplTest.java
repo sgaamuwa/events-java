@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -58,6 +59,9 @@ public class UserServiceImplTest {
 
     @MockBean
     private FriendRepository friendRepository;
+
+    @MockBean
+    private JavaMailSender javaMailSender;
 
     private User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123", "sgaamuwa@email.com");
     private User joy = new User("joy", "bawaya", "sgaamuwa", "pass123", "jbawaya@email.com");
@@ -193,17 +197,16 @@ public class UserServiceImplTest {
     @Test
     public void testAddsFriendWithValidId(){
         joy.setUserId(2);
-        Mockito.when(userRepository.findById(2)).thenReturn(Optional.of(joy));
-        userService.addFriend(1,2);
-        Assert.assertEquals(samuel.getFriends().size(), 1);
-        Mockito.verify(userRepository).save(samuel);
+        Mockito.when(userRepository.findByUsername("jbawaya")).thenReturn(Optional.of(joy));
+        userService.addFriend(1,"jbawaya");
+        Mockito.verify(friendRepository, Mockito.atMost(1)).save(new Friend(samuel, joy));
     }
 
     @Test
     public void testThrowsIllegalFriendActionExceptionIfUserAndFriendTheSame(){
-        Mockito.when(userRepository.findById(2)).thenReturn(Optional.of(joy));
+        Mockito.when(userRepository.findByUsername("jbawaya")).thenReturn(Optional.of(joy));
         Throwable exception = assertThrows(IllegalFriendActionException.class, () -> {
-            userService.addFriend(1, 2);
+            userService.addFriend(1, "jbawaya");
         });
         Assert.assertEquals("Can't add self as a friend", exception.getMessage());
     }

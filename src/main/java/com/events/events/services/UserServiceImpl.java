@@ -8,6 +8,7 @@ import com.events.events.repository.FriendRepository;
 import com.events.events.repository.UserRepository;
 import javassist.tools.web.BadHttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,6 +23,9 @@ import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    @Autowired
+    private JavaMailSender javaMailSender;
 
     @Autowired
     private UserRepository userRepository;
@@ -91,9 +95,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void addFriend(int userId, int friendId) {
-        User user = verifyAndReturnUser(userId);
-        User friend = verifyAndReturnUser(friendId);
+    public void addFriend(int userId, String username) {
+        User friend = verifyAndReturnUser(userId);
+        User user = verifyAndReturnUser(username);
         // create the friend
         if(user.equals(friend)){
             throw new IllegalFriendActionException("Can't add self as a friend");
@@ -136,11 +140,11 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException("Please provide a acceptValue");
         }
         // check that the user and the
-        verifyAndReturnUser(userId);
+        User user = verifyAndReturnUser(userId);
         int requesterId = (Integer) userInput.get("requesterId");
-        verifyAndReturnUser(requesterId);
+        User requester = verifyAndReturnUser(requesterId);
 
-        friendRepository.findById(new Friend.Key(userId, requesterId));
+        friendRepository.findById(new Friend.Key(user, requester));
 
     }
 

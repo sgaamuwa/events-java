@@ -48,9 +48,9 @@ public interface UserService extends UserDetailsService {
     /**
      * This method is used to add a friend to user
      * @param userId
-     * @param friendId
+     * @param username
      */
-    void addFriend(int userId, int friendId);
+    void addFriend(int userId, String username);
 
     /**
      * This method returns all the friends of a user

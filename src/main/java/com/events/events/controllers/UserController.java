@@ -49,10 +49,10 @@ public class UserController {
         return new ResponseEntity<>("Token for the user was set", HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{id}/friends/{friendId}", method = RequestMethod.POST)
-    public ResponseEntity<String> addFollower(@PathVariable("id") int id, @PathVariable("friendId") int friendId){
-        userService.addFriend(id, friendId);
-        return new ResponseEntity<>("Follower with user id: "+friendId+" added", HttpStatus.OK);
+    @RequestMapping(value = "/{id}/followRequest", method = RequestMethod.POST)
+    public ResponseEntity<String> requestFollow(@PathVariable("id") int id, Principal principal){
+        userService.addFriend(id, principal.getName());
+        return new ResponseEntity<>("Follower with user id: "+id+" requested", HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}/followers/", method = RequestMethod.GET)
