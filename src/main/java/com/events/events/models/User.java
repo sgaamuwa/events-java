@@ -62,7 +62,7 @@ public class User extends ResourceSupport {
             inverseJoinColumns = @JoinColumn(name = "event_id", referencedColumnName = "eventId"))
     private List<Event> attending;
 
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "key.owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Friend> friends;
 
     public User(){

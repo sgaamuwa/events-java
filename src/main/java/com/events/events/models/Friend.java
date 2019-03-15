@@ -1,39 +1,45 @@
 package com.events.events.models;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.time.LocalDate;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "friends")
 public class Friend {
 
     @EmbeddedId
     private Key key;
 
-    @ManyToOne
-    private User owner;
-
-    @ManyToOne
-    private User friend;
-
     private boolean isActive;
+
+    @Column(nullable = false, updatable = false)
+    @CreatedDate
+    private LocalDate createdAt;
+
+    @Column(nullable = false)
+    @LastModifiedDate
+    private LocalDate updatedAt;
 
     public Friend(){};
 
     public Friend(@NotNull User owner, @NotNull User friend){
-        this.owner = owner;
-        this.friend = friend;
         this.isActive = false;
-        this.key = new Key(owner.getUserId(), friend.getUserId());
+        this.key = new Key(owner, friend);
     }
 
     public User getOwner() {
-        return owner;
+        return key.owner;
     }
 
     public User getFriend() {
-        return friend;
+        return key.friend;
     }
 
     public boolean isActive() {
@@ -44,31 +50,44 @@ public class Friend {
         isActive = active;
     }
 
+    public LocalDate getCreatedAt(){
+        return createdAt;
+    }
+
+    public LocalDate getUpdatedAt(){
+        return updatedAt;
+    }
+
     @Embeddable
     public static class Key implements Serializable {
-        private int ownerId;
-        private int friendId;
+
+        @ManyToOne
+        private User owner;
+
+        @ManyToOne
+        private User friend;
+
         public Key(){}
-        public Key(int ownerId, int friendId){
+        public Key(User owner, User friend){
             this();
-            this.ownerId = ownerId;
-            this.friendId = friendId;
+            this.owner = owner;
+            this.friend = friend;
         }
 
-        public int getOwnerId() {
-            return ownerId;
+        public User getOwner() {
+            return owner;
         }
 
-        public void setOwnerId(int ownerId) {
-            this.ownerId = ownerId;
+        public void setOwnerId(User owner) {
+            this.owner = owner;
         }
 
-        public int getFriendId() {
-            return friendId;
+        public User getFriend() {
+            return friend;
         }
 
-        public void setFriendId(int friendId) {
-            this.friendId = friendId;
+        public void setFriendId(User friend) {
+            this.friend = friend;
         }
     }
 
@@ -83,6 +102,6 @@ public class Friend {
         if(!(obj instanceof Friend)){
             return false;
         }
-        return owner.equals(((Friend) obj).owner) && friend.equals(((Friend) obj).friend);
+        return key.owner.equals(((Friend) obj).key.owner) && key.friend.equals(((Friend) obj).key.friend);
     }
 }
