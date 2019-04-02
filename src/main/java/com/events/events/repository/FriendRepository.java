@@ -12,9 +12,9 @@ import java.util.List;
 @Repository
 public interface FriendRepository extends JpaRepository<Friend, Friend.Key> {
 
-    @Query(value = "SELECT * FROM friends f WHERE f.friend_id = :userId", nativeQuery = true)
+    @Query(value = "SELECT * FROM friends f WHERE f.friend_user_id = :userId", nativeQuery = true)
     List<Friend> getAllFollowers(@Param("userId") int userId);
 
-    @Query(value = "SELECT * FROM friends f where f.owner_id = :userId", nativeQuery = true)
+    @Query(value = "SELECT * FROM friends f where f.owner_user_id = :userId", nativeQuery = true)
     List<Friend> getAllFollowing(@Param("userId") int userId);
 }

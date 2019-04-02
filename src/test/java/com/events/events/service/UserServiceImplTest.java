@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -59,12 +60,16 @@ public class UserServiceImplTest {
     @MockBean
     private FriendRepository friendRepository;
 
+    @MockBean
+    private JavaMailSender javaMailSender;
+
     private User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123", "sgaamuwa@email.com");
     private User joy = new User("joy", "bawaya", "sgaamuwa", "pass123", "jbawaya@email.com");
 
     @Before
     public void setup(){
         Mockito.when(userRepository.findById(1)).thenReturn(Optional.of(samuel));
+        Mockito.when(userRepository.findByUsername("sgaamuwa")).thenReturn(Optional.of(samuel));
         Mockito.when(userRepository.findAll()).thenReturn(new ArrayList<>(Arrays.asList(samuel, joy)));
         Mockito.when(userRepository.findById(33)).thenReturn(Optional.empty());
         Mockito.when(userRepository.save(samuel)).thenReturn(samuel);
@@ -72,6 +77,7 @@ public class UserServiceImplTest {
 
     @Test
     public void testUserServiceSaveHashesPassword(){
+        Mockito.when(userRepository.findByUsername("sgaamuwa")).thenReturn(Optional.empty());
         userService.saveUser(samuel);
         ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
         Mockito.verify(userRepository).save(argument.capture());
@@ -143,7 +149,7 @@ public class UserServiceImplTest {
         ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
         // ensure that the password stored is encoded
         samuel.setPassword(bCryptPasswordEncoder.encode(samuel.getPassword()));
-        userService.changePassword(1, "pass123", "newPassword");
+        userService.changePassword("pass123", "newPassword", "sgaamuwa");
         Mockito.verify(userRepository, Mockito.atMost(1)).save(argument.capture());
         Assert.assertEquals(argument.getValue().getFirstName(), "samuel");
         Assert.assertTrue(bCryptPasswordEncoder.matches("newPassword", argument.getValue().getPassword()));
@@ -153,7 +159,7 @@ public class UserServiceImplTest {
     public void changeUserPasswordWithFalsePassword(){
         samuel.setPassword(bCryptPasswordEncoder.encode(samuel.getPassword()));
         Throwable exception = assertThrows(AuthenticationException.class, () -> {
-            userService.changePassword(1, "pass1234", "newPassword");
+            userService.changePassword("pass1234", "newPassword", "sgaamuwa");
         });
         Assert.assertEquals("Password does not match current password", exception.getMessage());
         Mockito.verify(userRepository, Mockito.never()).save(Mockito.any(User.class));
@@ -163,7 +169,7 @@ public class UserServiceImplTest {
     public void changeUserPasswordWithSamePassword(){
         samuel.setPassword(bCryptPasswordEncoder.encode(samuel.getPassword()));
         Throwable exception = assertThrows(AuthenticationException.class, () -> {
-            userService.changePassword(1, "pass123", "pass123");
+            userService.changePassword( "pass123", "pass123", "sgaamuwa");
         });
         Assert.assertEquals("New Password can't be the same as the old password", exception.getMessage());
         Mockito.verify(userRepository, Mockito.never()).save(Mockito.any(User.class));
@@ -173,7 +179,7 @@ public class UserServiceImplTest {
     public void changeUserPasswordWithShortPassword(){
         samuel.setPassword(bCryptPasswordEncoder.encode(samuel.getPassword()));
         Throwable exception = assertThrows(AuthenticationException.class, () -> {
-            userService.changePassword(1, "pass123", "pass");
+            userService.changePassword( "pass123", "pass", "sgaamuwa");
         });
         Assert.assertEquals("New Password must be more than 5", exception.getMessage());
         Mockito.verify(userRepository, Mockito.never()).save(Mockito.any(User.class));
@@ -183,7 +189,7 @@ public class UserServiceImplTest {
     public void changeUserPasswordWithShortPasswordWithSpaces(){
         samuel.setPassword(bCryptPasswordEncoder.encode(samuel.getPassword()));
         Throwable exception = assertThrows(AuthenticationException.class, () -> {
-            userService.changePassword(1, "pass123", "   pass    ");
+            userService.changePassword( "pass123", "   pass    ", "sgaamuwa");
         });
         Assert.assertEquals("New Password must be more than 5", exception.getMessage());
         Mockito.verify(userRepository, Mockito.never()).save(Mockito.any(User.class));
@@ -192,17 +198,16 @@ public class UserServiceImplTest {
     @Test
     public void testAddsFriendWithValidId(){
         joy.setUserId(2);
-        Mockito.when(userRepository.findById(2)).thenReturn(Optional.of(joy));
-        userService.addFriend(1,2);
-        Assert.assertEquals(samuel.getFriends().size(), 1);
-        Mockito.verify(userRepository).save(samuel);
+        Mockito.when(userRepository.findByUsername("jbawaya")).thenReturn(Optional.of(joy));
+        userService.addFriend(1,"jbawaya");
+        Mockito.verify(friendRepository, Mockito.atMost(1)).save(new Friend(samuel, joy));
     }
 
     @Test
     public void testThrowsIllegalFriendActionExceptionIfUserAndFriendTheSame(){
-        Mockito.when(userRepository.findById(2)).thenReturn(Optional.of(joy));
+        Mockito.when(userRepository.findByUsername("jbawaya")).thenReturn(Optional.of(joy));
         Throwable exception = assertThrows(IllegalFriendActionException.class, () -> {
-            userService.addFriend(1, 2);
+            userService.addFriend(1, "jbawaya");
         });
         Assert.assertEquals("Can't add self as a friend", exception.getMessage());
     }

@@ -38,19 +38,19 @@ public interface UserService extends UserDetailsService {
 
     /**
      * This method changes the password of the user to the new one provided
-     * @param userId
      * @param oldPassword
      * @param newPassword
+     * @param username
      */
-    @PreAuthorize("#userId == authentication.principal.id")
-    void changePassword(int userId, String oldPassword, String newPassword);
+    @PreAuthorize("#username == authentication.principal.username")
+    void changePassword(String oldPassword, String newPassword, String username);
 
     /**
      * This method is used to add a friend to user
      * @param userId
-     * @param friendId
+     * @param username
      */
-    void addFriend(int userId, int friendId);
+    void addFriend(int userId, String username);
 
     /**
      * This method returns all the friends of a user
