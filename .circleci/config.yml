@@ -9,7 +9,7 @@ jobs:
       - image: circleci/postgres:9.6.3-alpine
         environment:
           POSTGRES_USER: samuel
-          POSTGRES_DB: eventappdbtest
+          POSTGRES_DB: eventappdb
 
     steps:
 
