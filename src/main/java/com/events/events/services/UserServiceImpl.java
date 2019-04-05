@@ -1,9 +1,11 @@
 package com.events.events.services;
 
 import com.events.events.error.*;
+import com.events.events.models.ConfirmationToken;
 import com.events.events.models.Event;
 import com.events.events.models.Friend;
 import com.events.events.models.User;
+import com.events.events.repository.ConfirmationTokenRepository;
 import com.events.events.repository.FriendRepository;
 import com.events.events.repository.UserRepository;
 import javassist.tools.web.BadHttpRequest;
@@ -25,13 +27,16 @@ import java.util.*;
 public class UserServiceImpl implements UserService {
 
     @Autowired
-    private JavaMailSender javaMailSender;
+    private EmailService emailService;
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private FriendRepository friendRepository;
+
+    @Autowired
+    private ConfirmationTokenRepository confirmationTokenRepository;
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -56,7 +61,15 @@ public class UserServiceImpl implements UserService {
             throw new AuthenticationException("New Password must be more than 5");
         }
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+
+        user = userRepository.save(user);
+        // create a confirmation token for the user and save it
+        ConfirmationToken confirmationToken = new ConfirmationToken(user);
+        confirmationTokenRepository.save(confirmationToken);
+
+        // send a verification to the user
+        emailService.composeVerificationEmail(user.getEmail(), confirmationToken);
+        return user;
     }
 
     @Override
