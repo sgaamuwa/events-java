@@ -48,65 +48,7 @@ public class UserControllerTest {
         user2 = new User("jbawaya", "password");
         Mockito.when(userService.saveUser(user)).thenReturn(user);
     }
-
-    @Test
-    public void testControllerReturnsUserAfterRegistration() throws Exception{
-        mockMvc.perform(MockMvcRequestBuilders
-                .post("/users/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\n" +
-                        "\t\"firstName\": \"samuel\",\n" +
-                        "\t\"lastName\" : \"gaamuwa\",\n" +
-                        "\t\"username\" : \"sgaamuwa\",\n" +
-                        "\t\"password\" : \"pass123\"\n" +
-                        "}")
-                .characterEncoding("utf-8"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("sgaamuwa"));
-    }
-
-    @Test
-    public void testReturnsBadRequestWithEmptyString() throws Exception{
-        mockMvc.perform(MockMvcRequestBuilders
-                .post("/users/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("")
-                .characterEncoding("utf-8"))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void testReturnsBadRequestWithoutUserName() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders
-                .post("/users/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\n" +
-                        "\t\"firstName\": \"samuel\",\n" +
-                        "\t\"lastName\" : \"gaamuwa\",\n" +
-                        "\t\"password\" : \"pass123\"\n" +
-                        "}")
-                .characterEncoding("utf-8"))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void testReturnsBadRequestWithoutPassword() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders
-                .post("/users/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\n" +
-                        "\t\"firstName\": \"samuel\",\n" +
-                        "\t\"lastName\" : \"gaamuwa\",\n" +
-                        "\t\"username\" : \"sgaamuwa\",\n" +
-                        "}")
-                .characterEncoding("utf-8"))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
-    }
-
+    
     @Test
     @WithMockUser
     public void testReturnsUsersWhenUserIsValid() throws Exception {
