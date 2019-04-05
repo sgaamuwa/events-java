@@ -65,10 +65,13 @@ public class User extends ResourceSupport {
     @OneToMany(mappedBy = "key.owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Friend> friends;
 
+    private boolean enabled;
+
     public User(){
         this.createdEvents = Collections.emptyList();
         this.attending = Collections.emptyList();
         this.friends = Collections.emptySet();
+        this.enabled = false;
     }
 
     public User(String username, String password){
@@ -189,6 +192,14 @@ public class User extends ResourceSupport {
 
     public LocalDate getUpdatedAt(){
         return updatedAt;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     @Override

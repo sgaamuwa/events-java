@@ -18,6 +18,12 @@ public interface UserService extends UserDetailsService {
     User saveUser(User user);
 
     /**
+     * This method is used to enable a user that uses the verification link in the email
+     * @param token
+     */
+    void activateUser(String token);
+
+    /**
      * This method returns a user based on the Id provided
      * @param id
      * @return
