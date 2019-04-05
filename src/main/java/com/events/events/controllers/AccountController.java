@@ -28,7 +28,8 @@ public class AccountController {
 
     @RequestMapping(value = "/confirmAccount", method = RequestMethod.POST)
     public ResponseEntity<String> confirmUserAccount(@RequestParam("token") String token){
-        return new ResponseEntity<>("Got the token: "+token, HttpStatus.OK);
+        userService.activateUser(token);
+        return new ResponseEntity<>("User verification successful", HttpStatus.OK);
     }
 
     @RequestMapping(value = "/changePassword", method = RequestMethod.POST)

@@ -31,6 +31,8 @@ public class ConfirmationToken {
     @LastModifiedDate
     private LocalDate updatedAt;
 
+    public ConfirmationToken(){}
+
     public ConfirmationToken(User user) {
         this.user = user;
         token = UUID.randomUUID().toString();

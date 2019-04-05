@@ -8,9 +8,7 @@ import com.events.events.models.User;
 import com.events.events.repository.ConfirmationTokenRepository;
 import com.events.events.repository.FriendRepository;
 import com.events.events.repository.UserRepository;
-import javassist.tools.web.BadHttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -49,7 +47,14 @@ public class UserServiceImpl implements UserService {
             throw new UsernameNotFoundException("There is no user with the username: "+ username);
         }
 
-        return new org.springframework.security.core.userdetails.User(user.get().getUsername(), user.get().getPassword(), Collections.emptyList());
+        return new org.springframework.security.core.userdetails.User(
+                user.get().getUsername(),
+                user.get().getPassword(),
+                user.get().isEnabled(),
+                true,
+                true,
+                true,
+                Collections.emptyList());
     }
 
     @Transactional
@@ -70,6 +75,17 @@ public class UserServiceImpl implements UserService {
         // send a verification to the user
         emailService.composeVerificationEmail(user.getEmail(), confirmationToken);
         return user;
+    }
+
+    @Transactional
+    public void activateUser(String token){
+        Optional<ConfirmationToken> confirmationToken = confirmationTokenRepository.findByToken(token);
+        if(!confirmationToken.isPresent()){
+            throw new AuthenticationException("The provided token is not valid");
+        }
+        User user = confirmationToken.get().getUser();
+        user.setEnabled(true);
+        userRepository.save(user);
     }
 
     @Override
