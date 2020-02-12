@@ -10,7 +10,6 @@ import com.events.events.models.User;
 import com.events.events.repository.EventRepository;
 import com.events.events.repository.UserRepository;
 import com.events.events.error.NotFoundException;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;

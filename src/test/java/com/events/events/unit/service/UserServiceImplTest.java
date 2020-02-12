@@ -1,4 +1,4 @@
-package com.events.events.service;
+package com.events.events.unit.service;
 
 import com.events.events.error.AuthenticationException;
 import com.events.events.error.DuplicateCreationException;
