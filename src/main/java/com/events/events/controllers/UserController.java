@@ -22,12 +22,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @RequestMapping(value = "/signup",method = RequestMethod.POST)
-    public User registerUser(@Valid @RequestBody User user){
-        user.add(linkTo(UserController.class).withSelfRel());
-        return userService.saveUser(user);
-    }
-
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public User findOneUser(@PathVariable("id") int id, Principal principal ){
         return userService.getUserById(id);

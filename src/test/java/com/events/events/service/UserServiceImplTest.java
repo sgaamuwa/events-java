@@ -6,8 +6,10 @@ import com.events.events.error.IllegalFriendActionException;
 import com.events.events.error.NotFoundException;
 import com.events.events.models.Friend;
 import com.events.events.models.User;
+import com.events.events.repository.ConfirmationTokenRepository;
 import com.events.events.repository.FriendRepository;
 import com.events.events.repository.UserRepository;
+import com.events.events.services.EmailService;
 import com.events.events.services.UserService;
 import com.events.events.services.UserServiceImpl;
 import org.junit.Assert;
@@ -51,6 +53,9 @@ public class UserServiceImplTest {
     @Autowired
     private UserService userService;
 
+    @MockBean
+    private EmailService emailService;
+
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -59,6 +64,9 @@ public class UserServiceImplTest {
 
     @MockBean
     private FriendRepository friendRepository;
+
+    @MockBean
+    private ConfirmationTokenRepository confirmationTokenRepository;
 
     @MockBean
     private JavaMailSender javaMailSender;
