@@ -277,7 +277,7 @@ public class EventServiceImplTest {
         set.add(friend1);
         set.add(friend2);
 
-        List<Integer> numberList = Arrays.asList(new Integer(1), new Integer(2));
+        List<Integer> numberList = Arrays.asList(new Integer(2), new Integer(1));
 
         Mockito.when(eventRepository.findAllEventsByFriends(numberList)).thenReturn(Arrays.asList(newEvent, newEvent2));
         Mockito.when(userRepository.findByUsername("username")).thenReturn(Optional.of(user1));
