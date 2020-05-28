@@ -1,5 +1,6 @@
 package com.events.events.controllers;
 
+import com.events.events.error.BadRequestException;
 import com.events.events.models.Event;
 import com.events.events.services.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,11 @@ public class EventController {
     @RequestMapping(method = RequestMethod.GET)
     public List<Event> getAllEvents(){
         return eventService.getAllEvents();
+    }
+
+    @RequestMapping(value = "/user", method = RequestMethod.GET)
+    public List<Event> getAllEventsForUser(Principal principal){
+        return eventService.getAllEventsForUser(principal.getName());
     }
 
     @RequestMapping(method = RequestMethod.GET, params = "date")

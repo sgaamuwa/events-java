@@ -18,6 +18,9 @@ public interface EventRepository extends JpaRepository<Event, Integer>{
 
     List<Event> findByEventStatus(EventStatus eventStatus);
 
+    @Query(value = "SELECT * FROM events e WHERE e.user_id IN (:friends)", nativeQuery = true)
+    List<Event> findAllEventsByFriends(@Param("friends") List<Integer> friends);
+
     @Query(value = "SELECT * FROM events e WHERE e.date >= :date", nativeQuery = true)
     List<Event> getEventsAfterDate(@Param("date") LocalDate date);
 

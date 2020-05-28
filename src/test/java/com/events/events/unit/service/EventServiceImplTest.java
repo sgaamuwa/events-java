@@ -5,6 +5,7 @@ import com.events.events.error.InvalidDateException;
 import com.events.events.error.NotFoundException;
 import com.events.events.models.Event;
 import com.events.events.models.EventStatus;
+import com.events.events.models.Friend;
 import com.events.events.models.User;
 import com.events.events.repository.EventRepository;
 import com.events.events.repository.UserRepository;
@@ -22,6 +23,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.junit4.SpringRunner;
+import sun.jvm.hotspot.memory.FreeChunk;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -258,5 +260,31 @@ public class EventServiceImplTest {
             eventService.addSingleParticipantToEvent(56,1);
         });
         Assert.assertEquals("The event is not open", exception.getMessage());
+    }
+
+    @Test
+    public void testCanGetAllEventsByUsersFriends(){
+        samuel.setUserId(1);
+        male.setUserId(2);
+
+        Event newEvent = new Event("event", "Mityana", LocalDate.now().plusDays(3), samuel);
+        Event newEvent2 = new Event("event", "Mityana", LocalDate.now().plusDays(3), male);
+        User user1 = Mockito.mock(User.class);
+
+        Friend friend1 = new Friend(user1, samuel);
+        Friend friend2 = new Friend(user1, male);
+
+        Set<Friend> set = new HashSet<>();
+        set.add(friend1);
+        set.add(friend2);
+
+        List<Integer> numberList = Arrays.asList(new Integer(1), new Integer(2));
+
+        Mockito.when(eventRepository.findAllEventsByFriends(numberList)).thenReturn(Arrays.asList(newEvent, newEvent2));
+        Mockito.when(userRepository.findByUsername("username")).thenReturn(Optional.of(user1));
+
+        Mockito.when(user1.getFriends()).thenReturn(set);
+
+        Assert.assertEquals(eventService.getAllEventsForUser("username").size(), 2);
     }
 }
