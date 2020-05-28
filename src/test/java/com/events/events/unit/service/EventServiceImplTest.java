@@ -23,7 +23,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.junit4.SpringRunner;
-import sun.jvm.hotspot.memory.FreeChunk;
 
 import java.time.LocalDate;
 import java.util.*;
