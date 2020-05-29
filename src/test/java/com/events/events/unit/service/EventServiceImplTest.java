@@ -274,11 +274,12 @@ public class EventServiceImplTest {
         Friend friend1 = new Friend(user1, samuel);
         Friend friend2 = new Friend(user1, male);
 
+        friend1.setActive(true);
+        friend2.setActive(true);
+
         Set<Friend> set = new HashSet<>();
         set.add(friend1);
         set.add(friend2);
-
-        List<Integer> numberList = Arrays.asList(new Integer(1), new Integer(2));
 
         Mockito.when(eventRepository.findAllEventsByFriends(any(List.class))).thenReturn(Arrays.asList(newEvent, newEvent2));
         Mockito.when(userRepository.findByUsername("username")).thenReturn(Optional.of(user1));
@@ -287,5 +288,33 @@ public class EventServiceImplTest {
 
         Assert.assertEquals(eventService.getAllEventsForUser("username").size(), 2);
         Mockito.verify(eventRepository).findAllEventsByFriends(Arrays.asList(new Integer(2), new Integer(1)));
+    }
+
+    @Test
+    public void textCantGetEventsIfFollowRequestWasNotAccepted(){
+        samuel.setUserId(1);
+        male.setUserId(2);
+
+        Event newEvent = new Event("event", "Mityana", LocalDate.now().plusDays(3), samuel);
+        Event newEvent2 = new Event("event", "Mityana", LocalDate.now().plusDays(3), male);
+        User user1 = Mockito.mock(User.class);
+
+        Friend friend1 = new Friend(user1, samuel);
+        Friend friend2 = new Friend(user1, male);
+
+        friend1.setActive(true);
+        friend2.setActive(false);
+
+        Set<Friend> set = new HashSet<>();
+        set.add(friend1);
+        set.add(friend2);
+
+        Mockito.when(eventRepository.findAllEventsByFriends(Arrays.asList(new Integer(1)))).thenReturn(Arrays.asList(newEvent));
+        Mockito.when(userRepository.findByUsername("username")).thenReturn(Optional.of(user1));
+
+        Mockito.when(user1.getFriends()).thenReturn(set);
+
+        Assert.assertEquals(eventService.getAllEventsForUser("username").size(), 1);
+        Mockito.verify(eventRepository).findAllEventsByFriends(Arrays.asList(new Integer(1)));
     }
 }

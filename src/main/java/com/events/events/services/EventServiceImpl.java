@@ -95,9 +95,10 @@ public class EventServiceImpl implements EventService {
         if(!user.isPresent()){
             throw new UsernameNotFoundException("User with username: "+username+" does not exist");
         }
+        //set a check to make sure that the friend is active
         Set<Friend> friends = user.get().getFriends();
         //get the user ids for all the friends
-        List<Integer> friendsUserIds = friends.stream().map(friend -> friend.getFriend().getUserId()).collect(Collectors.toList());
+        List<Integer> friendsUserIds = friends.stream().filter(friend -> friend.isActive()).map(friend -> friend.getFriend().getUserId()).collect(Collectors.toList());
         List<Event> events = eventRepository.findAllEventsByFriends(friendsUserIds);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events");
