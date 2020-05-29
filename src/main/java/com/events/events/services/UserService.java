@@ -72,11 +72,23 @@ public interface UserService extends UserDetailsService {
     List<User> getAllFollowers(int userId);
 
     /**
-     * This method takes a map with user input i.e. the information about the follow request and the requester's id
+     * This method that accepts a follow request from the user with the given id
      * @param userId
-     * @param userInput
      */
-    void acceptFollowRequest(int userId, Map<String, Object> userInput);
+    void acceptFollowRequest(int userId, String username);
+
+    /**
+     * This is a method to reject a follow request from the user with the given id
+     * @param userId
+     */
+    void rejectFollowRequest(int userId, String username);
+
+    /**
+     * This is a method to stop following someone
+     * @param userId
+     * @param username
+     */
+    void unFollowUser(int userId, String username);
 
 
     List<Event> listEventsByUser(int userId);

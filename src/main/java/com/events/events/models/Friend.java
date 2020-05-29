@@ -89,6 +89,20 @@ public class Friend {
         public void setFriendId(User friend) {
             this.friend = friend;
         }
+
+        @Override
+        public boolean equals(Object obj){
+            if(obj == this){
+                return true;
+            }
+            if(obj == null){
+                return false;
+            }
+            if(!(obj instanceof Friend.Key)){
+                return false;
+            }
+            return this.owner.equals(((Key) obj).owner) && this.friend.equals(((Key) obj).friend);
+        }
     }
 
     @Override

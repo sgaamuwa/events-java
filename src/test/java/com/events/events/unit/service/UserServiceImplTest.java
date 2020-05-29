@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(SpringRunner.class)
 public class UserServiceImplTest {
@@ -103,7 +104,7 @@ public class UserServiceImplTest {
             userService.saveUser(joy);
         });
         Assert.assertEquals("User with the username: sgaamuwa already exists", exception.getMessage());
-        Mockito.verify(userRepository, Mockito.never()).save(Mockito.any(User.class));
+        Mockito.verify(userRepository, Mockito.never()).save(any(User.class));
     }
 
     @Test
@@ -123,7 +124,7 @@ public class UserServiceImplTest {
     @Test(expected = NotFoundException.class)
     public void testGetUserByIdWithInvalidUserId(){
         userService.getUserById(33);
-        Mockito.verify(userRepository, Mockito.never()).findById(Mockito.any(Integer.class));
+        Mockito.verify(userRepository, Mockito.never()).findById(any(Integer.class));
     }
 
     @Test
@@ -149,7 +150,7 @@ public class UserServiceImplTest {
             userService.deleteUser(33);
         });
         Assert.assertEquals("User with id: 33 not found", exception.getMessage());
-        Mockito.verify(userRepository, Mockito.never()).delete(Mockito.any(User.class));
+        Mockito.verify(userRepository, Mockito.never()).delete(any(User.class));
     }
 
     @Test
@@ -170,7 +171,7 @@ public class UserServiceImplTest {
             userService.changePassword("pass1234", "newPassword", "sgaamuwa");
         });
         Assert.assertEquals("Password does not match current password", exception.getMessage());
-        Mockito.verify(userRepository, Mockito.never()).save(Mockito.any(User.class));
+        Mockito.verify(userRepository, Mockito.never()).save(any(User.class));
     }
 
     @Test
@@ -180,7 +181,7 @@ public class UserServiceImplTest {
             userService.changePassword( "pass123", "pass123", "sgaamuwa");
         });
         Assert.assertEquals("New Password can't be the same as the old password", exception.getMessage());
-        Mockito.verify(userRepository, Mockito.never()).save(Mockito.any(User.class));
+        Mockito.verify(userRepository, Mockito.never()).save(any(User.class));
     }
 
     @Test
@@ -190,7 +191,7 @@ public class UserServiceImplTest {
             userService.changePassword( "pass123", "pass", "sgaamuwa");
         });
         Assert.assertEquals("New Password must be more than 5", exception.getMessage());
-        Mockito.verify(userRepository, Mockito.never()).save(Mockito.any(User.class));
+        Mockito.verify(userRepository, Mockito.never()).save(any(User.class));
     }
 
     @Test
@@ -200,7 +201,7 @@ public class UserServiceImplTest {
             userService.changePassword( "pass123", "   pass    ", "sgaamuwa");
         });
         Assert.assertEquals("New Password must be more than 5", exception.getMessage());
-        Mockito.verify(userRepository, Mockito.never()).save(Mockito.any(User.class));
+        Mockito.verify(userRepository, Mockito.never()).save(any(User.class));
     }
 
     @Test
@@ -228,6 +229,86 @@ public class UserServiceImplTest {
         Mockito.when(friendRepository.getAllFollowers(1)).thenReturn(friends);
         List<User> friendsList = userService.getAllFollowers(1);
         Assert.assertEquals(friendsList.size(), 2);
+    }
+
+    @Test
+    public void testCanAcceptFollowRequest(){
+        // have Samuel request to follow joy
+        Friend friend = new Friend(samuel, joy);
+
+        Mockito.when(userRepository.findByUsername("jbawaya")).thenReturn(Optional.of(joy));
+        Mockito.when(friendRepository.findById(new Friend.Key(samuel, joy))).thenReturn(Optional.of(friend));
+        userService.acceptFollowRequest(1, "jbawaya");
+        Mockito.verify(friendRepository, Mockito.atMost(1)).save(friend);
+    }
+
+    @Test
+    public void testThrowsExceptionIfThereIsNoRequestOnAcceptFollowRequest(){
+        Mockito.when(userRepository.findByUsername("jbawaya")).thenReturn(Optional.of(joy));
+        Mockito.when(friendRepository.findById(new Friend.Key(samuel, joy))).thenReturn(Optional.empty());
+        Throwable exception = assertThrows(IllegalFriendActionException.class, () -> {
+            userService.acceptFollowRequest(1, "jbawaya");
+        });
+        Assert.assertEquals("There is no request from:1", exception.getMessage());
+    }
+
+    @Test
+    public void testThrowsExceptionIfFollowRequestAlreadyAcceptedOnAcceptFollowRequest(){
+        Friend friend = new Friend(samuel, joy);
+        friend.setActive(true);
+
+        Mockito.when(userRepository.findByUsername("jbawaya")).thenReturn(Optional.of(joy));
+        Mockito.when(friendRepository.findById(new Friend.Key(samuel, joy))).thenReturn(Optional.of(friend));
+
+        Throwable exception = assertThrows(IllegalFriendActionException.class, () -> {
+            userService.acceptFollowRequest(1, "jbawaya");
+        });
+
+        Assert.assertEquals("You are already friends with user:1", exception.getMessage());
+    }
+
+    @Test
+    public void testCanRejectFollowRequest(){
+        // have Samuel request to follow joy
+        Friend friend = new Friend(samuel, joy);
+
+        Mockito.when(userRepository.findByUsername("jbawaya")).thenReturn(Optional.of(joy));
+        Mockito.when(friendRepository.findById(new Friend.Key(samuel, joy))).thenReturn(Optional.of(friend));
+        userService.rejectFollowRequest(1, "jbawaya");
+        Mockito.verify(friendRepository, Mockito.atMost(1)).delete(friend);
+    }
+
+    @Test
+    public void testThrowsExceptionIfThereIsNoRequestOnRejectFollowRequest(){
+        Mockito.when(userRepository.findByUsername("jbawaya")).thenReturn(Optional.of(joy));
+        Mockito.when(friendRepository.findById(new Friend.Key(samuel, joy))).thenReturn(Optional.empty());
+        Throwable exception = assertThrows(IllegalFriendActionException.class, () -> {
+            userService.rejectFollowRequest(1, "jbawaya");
+        });
+        Assert.assertEquals("There is no request from:1", exception.getMessage());
+    }
+
+    @Test
+    public void testCanUnFollowUser(){
+        // have samuel follow joy and activate it
+        Friend friend = new Friend(samuel, joy);
+        friend.setActive(true);
+
+        Mockito.when(userRepository.findByUsername("jbawaya")).thenReturn(Optional.of(joy));
+        Mockito.when(friendRepository.findById(new Friend.Key(joy, samuel))).thenReturn(Optional.of(friend));
+        userService.unFollowUser(1, "jbawaya");
+        Mockito.verify(friendRepository, Mockito.atMost(1)).delete(friend);
+    }
+
+    @Test
+    public void testCanUnFollowUserWhenNotAccepted(){
+        // have samuel follow joy and activate it
+        Friend friend = new Friend(samuel, joy);
+
+        Mockito.when(userRepository.findByUsername("jbawaya")).thenReturn(Optional.of(joy));
+        Mockito.when(friendRepository.findById(new Friend.Key(joy, samuel))).thenReturn(Optional.of(friend));
+        userService.unFollowUser(1, "jbawaya");
+        Mockito.verify(friendRepository, Mockito.atMost(1)).delete(friend);
     }
 
 }

@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.PrintStream;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,24 @@ public class UserController {
     public ResponseEntity<String> requestFollow(@PathVariable("id") int id, Principal principal){
         userService.addFriend(id, principal.getName());
         return new ResponseEntity<>("Follower with user id: "+id+" requested", HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{id}/followRequest/accept")
+    public ResponseEntity<String> acceptFollowRequest(@PathVariable("id") int id, Principal principal){
+        userService.acceptFollowRequest(id, principal.getName());
+        return new ResponseEntity<>("Request from user id: "+id+"accepted", HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{id}/followRequest/reject")
+    public ResponseEntity<String> rejectFollowRequest(@PathVariable("id") int id, Principal principal){
+        userService.rejectFollowRequest(id, principal.getName());
+        return new ResponseEntity<>("Request from user id: "+id+"rejected", HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{id}/unfollow")
+    public ResponseEntity<String> unFollowUser(@PathVariable("id") int id, Principal principal){
+        userService.unFollowUser(id, principal.getName());
+        return new ResponseEntity<>("You have stopped follow user with userId: "+id, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}/following/", method = RequestMethod.GET)

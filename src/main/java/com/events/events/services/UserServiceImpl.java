@@ -161,20 +161,60 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void acceptFollowRequest(int userId, Map<String, Object> userInput) {
-        //check that the map has the data we are looking for
-        if(!userInput.containsKey("requesterId")){
-            throw new BadRequestException("Please provide a requesterId");
-        }else if(!userInput.containsKey("acceptValue")){
-            throw new BadRequestException("Please provide a acceptValue");
+    @Transactional
+    public void acceptFollowRequest(int userId, String username) {
+        // check that the person cancelling the request exists
+        User user = verifyAndReturnUser(username);
+        // check that the user that requested exists
+        User requester = verifyAndReturnUser(userId);
+
+        //check to see if that follow relationship exists
+        Optional<Friend> friend = friendRepository.findById(new Friend.Key(requester, user));
+        if(!friend.isPresent()){
+            throw new IllegalFriendActionException("There is no request from:" + userId);
         }
-        // check that the user and the
-        User user = verifyAndReturnUser(userId);
-        int requesterId = (Integer) userInput.get("requesterId");
-        User requester = verifyAndReturnUser(requesterId);
+        if(friend.get().isActive()){
+            throw new IllegalFriendActionException("You are already friends with user:" + userId);
+        }
+        friend.get().setActive(true);
+        friendRepository.save(friend.get());
+    }
 
-        friendRepository.findById(new Friend.Key(user, requester));
+    @Override
+    @Transactional
+    public void rejectFollowRequest(int userId, String username) {
+        // check that the person cancelling the request exists
+        User user = verifyAndReturnUser(username);
+        // check that the user that requested exists
+        User requester = verifyAndReturnUser(userId);
 
+        //check to see if that follow relationship exists
+        Optional<Friend> friend = friendRepository.findById(new Friend.Key(requester, user));
+        if(!friend.isPresent()){
+            throw new IllegalFriendActionException("There is no request from:" + userId);
+        }
+
+        // delete the friend relationship from the database, whether friends or not
+        friendRepository.delete(friend.get());
+
+    }
+
+    @Override
+    @Transactional
+    public void unFollowUser(int userId, String username) {
+        // check that the person cancelling the request exists
+        User user = verifyAndReturnUser(username);
+        // check that the user that requested exists
+        User requester = verifyAndReturnUser(userId);
+
+        //check to see if that follow relationship exists
+        Optional<Friend> friend = friendRepository.findById(new Friend.Key(user, requester));
+        if(!friend.isPresent()){
+            throw new IllegalFriendActionException("You are not following:" + userId);
+        }
+
+        // delete the friend relationship from the database, whether friends or not
+        friendRepository.delete(friend.get());
     }
 
     @Override
