@@ -137,7 +137,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getAllFriends(int userId) {
+    public List<User> getAllFollowing(int userId) {
         User user = verifyAndReturnUser(userId);
         List<User> friends = new ArrayList<>();
         for(Friend friend : user.getFriends()){

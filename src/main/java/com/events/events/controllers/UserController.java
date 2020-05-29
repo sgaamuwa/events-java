@@ -49,10 +49,16 @@ public class UserController {
         return new ResponseEntity<>("Follower with user id: "+id+" requested", HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{id}/followers/", method = RequestMethod.GET)
+    @RequestMapping(value = "/{id}/following/", method = RequestMethod.GET)
     public List<User> getUserFriends(@PathVariable("id") int id){
-       return userService.getAllFriends(id);
+       // method to return all the users that this particular user is following
+        return userService.getAllFollowing(id);
     }
 
+    @RequestMapping(value = "/{id}/followers", method = RequestMethod.GET)
+    public List<User> getUserFollowers(@PathVariable("id") int id){
+        // method to return all the users that are following this particular user
+        return userService.getAllFollowers(id);
+    }
 
 }

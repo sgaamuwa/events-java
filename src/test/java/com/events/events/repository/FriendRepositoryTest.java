@@ -46,11 +46,21 @@ public class FriendRepositoryTest {
 
     @Test
     public void testCanRetrieveFollowersForAUser(){
+        Friend friend1 = new Friend(male, samuel);
+        Friend friend2 = new Friend(joy, samuel);
+        Friend friend3 = new Friend(bruce, samuel);
+        Friend friend4 = new Friend(samuel, peace);
 
-        entityManager.persist(new Friend(male, samuel));
-        entityManager.persist(new Friend(joy, samuel));
-        entityManager.persist(new Friend(bruce, samuel));
-        entityManager.persist(new Friend(samuel, peace));
+        //activate all the friendships
+        friend1.setActive(true);
+        friend2.setActive(true);
+        friend3.setActive(true);
+        friend4.setActive(true);
+
+        entityManager.persist(friend1);
+        entityManager.persist(friend2);
+        entityManager.persist(friend3);
+        entityManager.persist(friend4);
         entityManager.flush();
 
         List<Friend> returnedFriends = friendRepository.getAllFollowers(samuel.getUserId());
@@ -59,16 +69,47 @@ public class FriendRepositoryTest {
     }
 
     @Test
-    public void testCanRetrieveFriendsUserIsFollowing(){
-        entityManager.persist(new Friend(male, samuel));
-        entityManager.persist(new Friend(joy, bruce));
-        entityManager.persist(new Friend(bruce, joy));
-        entityManager.persist(new Friend(bruce, peace));
+    public void testCanRetrieveUserOneIsFollowingIfActivated(){
+        Friend friend1 = new Friend(male, samuel);
+        Friend friend2 = new Friend(joy, bruce);
+        Friend friend3 = new Friend(bruce, joy);
+        Friend friend4 = new Friend(bruce, peace);
+        Friend friend5 = new Friend(bruce, samuel);
+
+        friend1.setActive(true);
+        friend2.setActive(true);
+        friend3.setActive(true);
+        friend4.setActive(true);
+
+        entityManager.persist(friend1);
+        entityManager.persist(friend2);
+        entityManager.persist(friend3);
+        entityManager.persist(friend4);
+        entityManager.persist(friend5);
         entityManager.flush();
 
         List<Friend> returnedFriends = friendRepository.getAllFollowing(bruce.getUserId());
 
         Assert.assertEquals(returnedFriends.size(), 2);
+    }
+
+    @Test
+    public void testDoesntRetrieveFollowersIfNotActivated(){
+        Friend friend1 = new Friend(male, samuel);
+        Friend friend2 = new Friend(joy, bruce);
+        Friend friend3 = new Friend(bruce, joy);
+        Friend friend4 = new Friend(bruce, peace);
+
+        entityManager.persist(friend1);
+        entityManager.persist(friend2);
+        entityManager.persist(friend3);
+        entityManager.persist(friend4);
+        entityManager.flush();
+
+        List<Friend> returnedFriends = friendRepository.getAllFollowing(bruce.getUserId());
+
+        // should not retrieve any followers since they were not activated
+        Assert.assertEquals(returnedFriends.size(), 0);
     }
 
 }
