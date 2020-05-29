@@ -59,10 +59,10 @@ public interface UserService extends UserDetailsService {
     void addFriend(int userId, String username);
 
     /**
-     * This method returns all the friends of a user
+     * This method returns all the users that this particular user is following"
      * @param userId
      */
-    List<User> getAllFriends(int userId);
+    List<User> getAllFollowing(int userId);
 
     /**
      * This method returns all the users that are following this particular user

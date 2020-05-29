@@ -6,6 +6,7 @@ import com.events.events.error.EmptyListException;
 import com.events.events.error.InvalidDateException;
 import com.events.events.models.Event;
 import com.events.events.models.EventStatus;
+import com.events.events.models.Friend;
 import com.events.events.models.User;
 import com.events.events.repository.EventRepository;
 import com.events.events.repository.UserRepository;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class EventServiceImpl implements EventService {
@@ -80,6 +82,24 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public List<Event> getAllEvents() {
         List<Event> events = eventRepository.findAll();
+        if(events.isEmpty()){
+            throw new EmptyListException("There are no available events");
+        }
+        return events;
+    }
+
+    @Override
+    @Transactional
+    public List<Event> getAllEventsForUser(String username){
+        Optional<User> user = userRepository.findByUsername(username);
+        if(!user.isPresent()){
+            throw new UsernameNotFoundException("User with username: "+username+" does not exist");
+        }
+        //set a check to make sure that the friend is active
+        Set<Friend> friends = user.get().getFriends();
+        //get the user ids for all the friends
+        List<Integer> friendsUserIds = friends.stream().filter(friend -> friend.isActive()).map(friend -> friend.getFriend().getUserId()).collect(Collectors.toList());
+        List<Event> events = eventRepository.findAllEventsByFriends(friendsUserIds);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events");
         }
@@ -185,6 +205,14 @@ public class EventServiceImpl implements EventService {
             throw new DuplicateCreationException("Can only cancel OPEN events");
         }
         eventRepository.save(event);
+    }
+
+    @Override
+    @Transactional
+    public List<Event> getEventsByUser(int userId){
+        User user = verifyAndReturnUser(userId);
+        List<Event> events = user.getCreatedEvents();
+        return events;
     }
 
     @Override

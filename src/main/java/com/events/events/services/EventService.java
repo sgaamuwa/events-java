@@ -49,6 +49,14 @@ public interface EventService {
     List<Event> getAllEvents();
 
     /**
+     * This method returns all events that the user should be able to see
+     * From friends and their own events
+     * @param username
+     * @return
+     */
+    List<Event> getAllEventsForUser(String username);
+
+    /**
      * This is a method that adds a number of users to an event
      * @param eventId
      * @param participants
@@ -73,6 +81,13 @@ public interface EventService {
     List<Event> getEventsBetweenDates(LocalDate dateFrom, LocalDate dateTo);
     List<Event> getEventsAfterDate(LocalDate date);
     List<Event> getEventsBeforeDate(LocalDate date);
+
+    /**
+     * This is a method to return all the events of a user given their id
+     * @param userId
+     * @return
+     */
+    List<Event> getEventsByUser(int userId);
 
     /**
      * This is a method to cancel an event by the user

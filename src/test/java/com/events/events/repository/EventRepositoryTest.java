@@ -16,10 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -130,6 +127,28 @@ public class EventRepositoryTest {
         Assert.assertEquals(eventRepository.findByEventStatus(EventStatus.OPEN).size(), 2);
         Assert.assertEquals(eventRepository.findByEventStatus(EventStatus.CANCELLED).size(), 1);
         Assert.assertEquals(eventRepository.findByEventStatus(EventStatus.CANCELLED).get(0), beach);
+    }
+
+    @Test
+    public void canFindAllEventsByUsersFriends(){
+        Event beach = new Event("beach", "Entebbe", LocalDate.now().plusDays(2), samuel);
+        Event jumping = new Event("jumping", "Jinja", LocalDate.now().plusDays(3), male);
+        Event nightDancing = new Event("nightDancing", "mukono", LocalDate.now().plusDays(4), samuel);
+        Event quidditch = new Event("quidditch", "hogwarts", LocalDate.now().plusDays(5), male);
+        Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now(), bruce);
+
+        entityManager.persist(samuel);
+        entityManager.persist(male);
+        entityManager.persist(bruce);
+        entityManager.persist(beach);
+        entityManager.persist(jumping);
+        entityManager.persist(cinemaMovie);
+        entityManager.persist(nightDancing);
+        entityManager.persist(quidditch);
+        entityManager.flush();
+
+        Assert.assertEquals(eventRepository.findAll().size(), 5);
+        Assert.assertEquals(eventRepository.findAllEventsByFriends(Arrays.asList(samuel.getUserId(), male.getUserId())).size(), 4);
     }
 
 }

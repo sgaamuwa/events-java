@@ -5,6 +5,7 @@ import com.events.events.error.InvalidDateException;
 import com.events.events.error.NotFoundException;
 import com.events.events.models.Event;
 import com.events.events.models.EventStatus;
+import com.events.events.models.Friend;
 import com.events.events.models.User;
 import com.events.events.repository.EventRepository;
 import com.events.events.repository.UserRepository;
@@ -27,6 +28,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(SpringRunner.class)
 public class EventServiceImplTest {
@@ -88,7 +90,7 @@ public class EventServiceImplTest {
         });
         Assert.assertEquals("User with id: 23 not found", exception.getMessage());
         // ensure the save method is never called
-        Mockito.verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
+        Mockito.verify(eventRepository, Mockito.never()).save(any(Event.class));
     }
 
     @Test
@@ -99,7 +101,7 @@ public class EventServiceImplTest {
         });
         Assert.assertEquals("Event with id: 12 not found", exception.getMessage());
         // ensure the save method is never called
-        Mockito.verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
+        Mockito.verify(eventRepository, Mockito.never()).save(any(Event.class));
     }
 
     @Test
@@ -110,7 +112,7 @@ public class EventServiceImplTest {
         });
         Assert.assertEquals("User with id: 1 is already a participant", exception.getMessage());
         // ensure the save method is never called
-        Mockito.verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
+        Mockito.verify(eventRepository, Mockito.never()).save(any(Event.class));
     }
 
     @Test
@@ -123,7 +125,7 @@ public class EventServiceImplTest {
         });
         Assert.assertEquals("Event date must be at least a day from now", exception.getMessage());
 
-        Mockito.verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
+        Mockito.verify(eventRepository, Mockito.never()).save(any(Event.class));
     }
 
     @Test
@@ -136,7 +138,7 @@ public class EventServiceImplTest {
         });
         Assert.assertEquals("Event date must be at least a day from now", exception.getMessage());
 
-        Mockito.verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
+        Mockito.verify(eventRepository, Mockito.never()).save(any(Event.class));
     }
 
     @Test
@@ -164,7 +166,7 @@ public class EventServiceImplTest {
             eventService.deleteEvent(12);
         });
         Assert.assertEquals("Event with id: 12 not found", exception.getMessage());
-        Mockito.verify(eventRepository, Mockito.never()).delete(Mockito.any(Event.class));
+        Mockito.verify(eventRepository, Mockito.never()).delete(any(Event.class));
     }
 
     @Test
@@ -258,5 +260,60 @@ public class EventServiceImplTest {
             eventService.addSingleParticipantToEvent(56,1);
         });
         Assert.assertEquals("The event is not open", exception.getMessage());
+    }
+
+    @Test
+    public void testCanGetAllEventsByUsersFriends(){
+        samuel.setUserId(1);
+        male.setUserId(2);
+
+        Event newEvent = new Event("event", "Mityana", LocalDate.now().plusDays(3), samuel);
+        Event newEvent2 = new Event("event", "Mityana", LocalDate.now().plusDays(3), male);
+        User user1 = Mockito.mock(User.class);
+
+        Friend friend1 = new Friend(user1, samuel);
+        Friend friend2 = new Friend(user1, male);
+
+        friend1.setActive(true);
+        friend2.setActive(true);
+
+        Set<Friend> set = new HashSet<>();
+        set.add(friend1);
+        set.add(friend2);
+
+        Mockito.when(eventRepository.findAllEventsByFriends(any(List.class))).thenReturn(Arrays.asList(newEvent, newEvent2));
+        Mockito.when(userRepository.findByUsername("username")).thenReturn(Optional.of(user1));
+
+        Mockito.when(user1.getFriends()).thenReturn(set);
+
+        Assert.assertEquals(eventService.getAllEventsForUser("username").size(), 2);
+    }
+
+    @Test
+    public void textCantGetEventsIfFollowRequestWasNotAccepted(){
+        samuel.setUserId(1);
+        male.setUserId(2);
+
+        Event newEvent = new Event("event", "Mityana", LocalDate.now().plusDays(3), samuel);
+        Event newEvent2 = new Event("event", "Mityana", LocalDate.now().plusDays(3), male);
+        User user1 = Mockito.mock(User.class);
+
+        Friend friend1 = new Friend(user1, samuel);
+        Friend friend2 = new Friend(user1, male);
+
+        friend1.setActive(true);
+        friend2.setActive(false);
+
+        Set<Friend> set = new HashSet<>();
+        set.add(friend1);
+        set.add(friend2);
+
+        Mockito.when(eventRepository.findAllEventsByFriends(Arrays.asList(new Integer(1)))).thenReturn(Arrays.asList(newEvent));
+        Mockito.when(userRepository.findByUsername("username")).thenReturn(Optional.of(user1));
+
+        Mockito.when(user1.getFriends()).thenReturn(set);
+
+        Assert.assertEquals(eventService.getAllEventsForUser("username").size(), 1);
+        Mockito.verify(eventRepository).findAllEventsByFriends(Arrays.asList(new Integer(1)));
     }
 }
