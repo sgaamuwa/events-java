@@ -287,7 +287,6 @@ public class EventServiceImplTest {
         Mockito.when(user1.getFriends()).thenReturn(set);
 
         Assert.assertEquals(eventService.getAllEventsForUser("username").size(), 2);
-        Mockito.verify(eventRepository).findAllEventsByFriends(Arrays.asList(new Integer(2), new Integer(1)));
     }
 
     @Test
