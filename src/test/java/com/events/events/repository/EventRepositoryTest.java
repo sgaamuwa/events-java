@@ -133,6 +133,8 @@ public class EventRepositoryTest {
     public void canFindAllEventsByUsersFriends(){
         Event beach = new Event("beach", "Entebbe", LocalDate.now().plusDays(2), samuel);
         Event jumping = new Event("jumping", "Jinja", LocalDate.now().plusDays(3), male);
+        Event nightDancing = new Event("nightDancing", "mukono", LocalDate.now().plusDays(4), samuel);
+        Event quidditch = new Event("quidditch", "hogwarts", LocalDate.now().plusDays(5), male);
         Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now(), bruce);
 
         entityManager.persist(samuel);
@@ -141,8 +143,12 @@ public class EventRepositoryTest {
         entityManager.persist(beach);
         entityManager.persist(jumping);
         entityManager.persist(cinemaMovie);
+        entityManager.persist(nightDancing);
+        entityManager.persist(quidditch);
+        entityManager.flush();
 
-        Assert.assertEquals(eventRepository.findAllEventsByFriends(Arrays.asList(new Integer(1), new Integer(2))).size(), 2);
+        Assert.assertEquals(eventRepository.findAll().size(), 5);
+        Assert.assertEquals(eventRepository.findAllEventsByFriends(Arrays.asList(samuel.getUserId(), male.getUserId())).size(), 4);
     }
 
 }
