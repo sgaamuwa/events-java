@@ -9,7 +9,7 @@ jobs:
       - image: circleci/postgres:9.6.3-alpine
         environment:
           POSTGRES_USER: samuel
-          POSTGRES_DB: eventappdb
+          POSTGRES_DB: eventappdbtest
 
     steps:
 
@@ -26,3 +26,6 @@ jobs:
           key: events-java-{{ checksum "pom.xml" }}
       
       - run: mvn test
+
+      - store_test_results:
+          path: target/surefire-reports
