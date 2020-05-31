@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -21,7 +21,7 @@ import java.util.Set;
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"},
         allowGetters = true)
 @Table(name = "users")
-public class User extends ResourceSupport {
+public class User extends RepresentationModel<User> {
 
     @Id
     @GeneratedValue

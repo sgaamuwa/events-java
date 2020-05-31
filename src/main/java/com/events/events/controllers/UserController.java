@@ -14,7 +14,6 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 @RestController
 @RequestMapping("/users")

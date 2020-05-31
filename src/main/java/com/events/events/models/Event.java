@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;;
 
 import javax.persistence.*;
 import java.net.URL;
@@ -16,7 +16,7 @@ import java.util.*;
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"},
         allowGetters = true)
 @Table(name = "events")
-public class Event extends ResourceSupport {
+public class Event extends RepresentationModel<Event> {
 
     @Id
     @GeneratedValue
