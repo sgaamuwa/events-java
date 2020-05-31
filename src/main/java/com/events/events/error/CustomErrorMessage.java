@@ -8,12 +8,10 @@ public class CustomErrorMessage {
 
     private HttpStatus status;
     private String message;
-    private String errors;
 
-    public CustomErrorMessage(HttpStatus status, String message, String errors){
+    public CustomErrorMessage(HttpStatus status, String message){
         this.status = status;
         this.message = message;
-        this.errors = errors;
     }
 
     public HttpStatus getStatus() {
@@ -32,11 +30,4 @@ public class CustomErrorMessage {
         this.message = message;
     }
 
-    public String getErrors() {
-        return errors;
-    }
-
-    public void setErrors(String errors) {
-        this.errors = errors;
-    }
 }

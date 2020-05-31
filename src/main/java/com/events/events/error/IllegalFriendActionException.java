@@ -16,4 +16,6 @@ public class IllegalFriendActionException extends RuntimeException {
     public String getMessage(){
         return this.message;
     }
+
+
 }
