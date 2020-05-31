@@ -1,17 +1,17 @@
 -- user high numbers because postgres doesn't keep track of sequences and tests will create users and objects from 1 so you will have conflicts
 
-INSERT INTO users (user_id, created_at, email, enabled, first_name, last_name, updated_at, username)
-    VALUES(91, current_date , 'sgaamuwa@gmail.com', true, 'Samuel', 'Gaamuwa', current_date, 'samuelgaamuwa' );
-INSERT INTO users (user_id, created_at, email, enabled, first_name, last_name, updated_at, username)
-    VALUES(92, current_date, 'jbawaya@gmail.com', true, 'Joy', 'Bawaya', current_date, 'jbawaya' );
-INSERT INTO users (user_id, created_at, email, enabled, first_name, last_name, updated_at, username)
-    VALUES(93, current_date , 'snazziwa@gmail.com', true, 'Sandra', 'Nazziwa', current_date, 'snazziwa' );
-INSERT INTO users (user_id, created_at, email, enabled, first_name, last_name, updated_at, username)
-    VALUES(94, current_date , 'mgaamuwa@gmail.com', true, 'Merab', 'Gaamuwa', current_date, 'mgaamuwa' );
-INSERT INTO users (user_id, created_at, email, enabled, first_name, last_name, updated_at, username)
-    VALUES(95, current_date , 'egaamuwa@gmail.com', true, 'Edward', 'Gaamuwa', current_date, 'egaamuwa' );
-INSERT INTO users (user_id, created_at, email, enabled, first_name, last_name, updated_at, username)
-    VALUES(96, current_date, 'pnakiyemba@gmail.com', true, 'Peace', 'Nakiyemba', current_date, 'pnakiyemba' );
+INSERT INTO users (user_id, created_at, email, enabled, first_name, last_name, updated_at, username, password)
+    VALUES(91, current_date , 'sgaamuwa@gmail.com', true, 'Samuel', 'Gaamuwa', current_date, 'samuelgaamuwa', 'pass123');
+INSERT INTO users (user_id, created_at, email, enabled, first_name, last_name, updated_at, username, password)
+    VALUES(92, current_date, 'jbawaya@gmail.com', true, 'Joy', 'Bawaya', current_date, 'jbawaya', 'pass123');
+INSERT INTO users (user_id, created_at, email, enabled, first_name, last_name, updated_at, username, password)
+    VALUES(93, current_date , 'snazziwa@gmail.com', true, 'Sandra', 'Nazziwa', current_date, 'snazziwa', 'pass123' );
+INSERT INTO users (user_id, created_at, email, enabled, first_name, last_name, updated_at, username, password)
+    VALUES(94, current_date , 'mgaamuwa@gmail.com', true, 'Merab', 'Gaamuwa', current_date, 'mgaamuwa', 'pass123' );
+INSERT INTO users (user_id, created_at, email, enabled, first_name, last_name, updated_at, username, password)
+    VALUES(95, current_date , 'egaamuwa@gmail.com', true, 'Edward', 'Gaamuwa', current_date, 'egaamuwa', 'pass123' );
+INSERT INTO users (user_id, created_at, email, enabled, first_name, last_name, updated_at, username, password)
+    VALUES(96, current_date, 'pnakiyemba@gmail.com', true, 'Peace', 'Nakiyemba', current_date, 'pnakiyemba', 'pass123' );
 
 INSERT INTO events (event_id, created_at, date, event_status, location, title, updated_at, user_id)
     VALUES(91, current_date, current_date + 2, 0, 'Zanzibar', 'Snockling', current_date, 91);
@@ -49,3 +49,7 @@ INSERT INTO friends (created_at, is_active, updated_at, owner_user_id, friend_us
     VALUES(current_date, true, current_date, 92, 91);
 INSERT INTO friends (created_at, is_active, updated_at, owner_user_id, friend_user_id)
     VALUES(current_date, true, current_date, 93, 91);
+INSERT INTO friends (created_at, is_active, updated_at, owner_user_id, friend_user_id)
+    VALUES(current_date, false, current_date, 91, 93);
+INSERT INTO friends (created_at, is_active, updated_at, owner_user_id, friend_user_id)
+    VALUES(current_date, false, current_date, 92, 93);

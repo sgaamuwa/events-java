@@ -9,7 +9,7 @@ import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
+import org.hibernate.validator.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.Collections;
 import java.util.List;

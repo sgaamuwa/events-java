@@ -131,7 +131,13 @@ public class UserServiceImpl implements UserService {
         if(user.equals(friend)){
             throw new IllegalFriendActionException("Can't add self as a friend");
         }
+        // check if the user is already following this person
         Friend newFriend = new Friend(user, friend);
+        for(Friend singleFriend: user.getFriends()){
+            if(singleFriend.equals(newFriend)){
+                throw new IllegalFriendActionException("User is already following or requested to follow user with Id: " + userId);
+            }
+        }
         // add the friend to the user
         friendRepository.save(newFriend);
     }

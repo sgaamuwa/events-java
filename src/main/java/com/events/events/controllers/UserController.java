@@ -3,13 +3,10 @@ package com.events.events.controllers;
 import com.events.events.models.User;
 import com.events.events.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import java.io.PrintStream;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -49,19 +46,19 @@ public class UserController {
         return new ResponseEntity<>("Follower with user id: "+id+" requested", HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{id}/followRequest/accept")
+    @RequestMapping(value = "/{id}/followRequest/accept", method = RequestMethod.POST)
     public ResponseEntity<String> acceptFollowRequest(@PathVariable("id") int id, Principal principal){
         userService.acceptFollowRequest(id, principal.getName());
         return new ResponseEntity<>("Request from user id: "+id+"accepted", HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{id}/followRequest/reject")
+    @RequestMapping(value = "/{id}/followRequest/reject", method = RequestMethod.POST)
     public ResponseEntity<String> rejectFollowRequest(@PathVariable("id") int id, Principal principal){
         userService.rejectFollowRequest(id, principal.getName());
         return new ResponseEntity<>("Request from user id: "+id+"rejected", HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{id}/unfollow")
+    @RequestMapping(value = "/{id}/unfollow", method = RequestMethod.POST)
     public ResponseEntity<String> unFollowUser(@PathVariable("id") int id, Principal principal){
         userService.unFollowUser(id, principal.getName());
         return new ResponseEntity<>("You have stopped follow user with userId: "+id, HttpStatus.OK);

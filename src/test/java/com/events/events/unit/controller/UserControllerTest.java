@@ -21,10 +21,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Arrays;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(UserController.class)
@@ -60,5 +61,28 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
     }
+
+    @Test
+    public void testReturns403ForbiddenIfUserIsNotValidOnGetUsers() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders
+                .get("/users")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser
+    public void testReturnsUserGivenIdIfUserIsValid() throws Exception{
+        Mockito.when(userService.getUserById(1)).thenReturn(user);
+        mockMvc.perform(MockMvcRequestBuilders
+                .get("/users/1")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("sgaamuwa")));
+    }
+
+
 
 }
