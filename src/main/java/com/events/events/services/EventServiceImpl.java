@@ -168,7 +168,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public List<Event> getEventsBetweenDates(LocalDate dateFrom, LocalDate dateTo) {
-        List<Event> events = eventRepository.getEventsBetweenDates(dateFrom, dateTo);
+        List<Event> events = eventRepository.findByDateBetween(dateFrom, dateTo);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events for between the dates: "+ dateFrom + " and "+ dateTo);
         }
@@ -178,7 +178,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public List<Event> getEventsAfterDate(LocalDate date) {
-        List<Event> events = eventRepository.getEventsAfterDate(date);
+        List<Event> events = eventRepository.findByDateGreaterThan(date);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events after the date: "+ date);
         }
@@ -188,7 +188,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public List<Event> getEventsBeforeDate(LocalDate date) {
-        List<Event> events = eventRepository.getEventsBeforeDate(date);
+        List<Event> events = eventRepository.findByDateLessThan(date);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events before the date: "+ date);
         }
