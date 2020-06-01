@@ -55,7 +55,7 @@ public class UserControllerTest {
     public void testReturnsUsersWhenUserIsValid() throws Exception {
         Mockito.when(userService.getAllUsers()).thenReturn(Arrays.asList(user, user2));
         mockMvc.perform(MockMvcRequestBuilders
-                .get("/users")
+                .get("/v1/users")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -65,7 +65,7 @@ public class UserControllerTest {
     @Test
     public void testReturns403ForbiddenIfUserIsNotValidOnGetUsers() throws Exception{
         mockMvc.perform(MockMvcRequestBuilders
-                .get("/users")
+                .get("/v1/users")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -76,7 +76,7 @@ public class UserControllerTest {
     public void testReturnsUserGivenIdIfUserIsValid() throws Exception{
         Mockito.when(userService.getUserById(1)).thenReturn(user);
         mockMvc.perform(MockMvcRequestBuilders
-                .get("/users/1")
+                .get("/v1/users/1")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())

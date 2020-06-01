@@ -124,10 +124,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void addFriend(int userId, String username) {
-        User friend = verifyAndReturnUser(userId);
-        User user = verifyAndReturnUser(username);
-        // create the friend
+    public void addFriend(int userId, int friendId, String username) {
+        User friend = verifyAndReturnUser(friendId);
+        User user = verifyAndReturnUser(userId);
+        // check that the user returned is the same user accessing the system
+        if(!user.getUsername().equals(username)){
+            throw new AuthorisationException("You do not have the required permission to complete this operation");
+        }
         if(user.equals(friend)){
             throw new IllegalFriendActionException("Can't add self as a friend");
         }
@@ -135,7 +138,7 @@ public class UserServiceImpl implements UserService {
         Friend newFriend = new Friend(user, friend);
         for(Friend singleFriend: user.getFriends()){
             if(singleFriend.equals(newFriend)){
-                throw new IllegalFriendActionException("User is already following or requested to follow user with Id: " + userId);
+                throw new IllegalFriendActionException("User is already following or requested to follow user with Id: " + friendId);
             }
         }
         // add the friend to the user
@@ -168,19 +171,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void acceptFollowRequest(int userId, String username) {
+    public void acceptFollowRequest(int userId, int followerId, String username) {
         // check that the person cancelling the request exists
-        User user = verifyAndReturnUser(username);
+        User user = verifyAndReturnUser(userId);
         // check that the user that requested exists
-        User requester = verifyAndReturnUser(userId);
+        User follower = verifyAndReturnUser(followerId);
+        // check that the user id and username belong to the same user
+        if(!user.getUsername().equals(username)){
+            throw new AuthorisationException("You do not have the required permission to complete this operation");
+        }
 
         //check to see if that follow relationship exists
-        Optional<Friend> friend = friendRepository.findById(new Friend.Key(requester, user));
+        Optional<Friend> friend = friendRepository.findById(new Friend.Key(follower, user));
         if(!friend.isPresent()){
-            throw new IllegalFriendActionException("There is no request from:" + userId);
+            throw new IllegalFriendActionException("There is no request from:" + followerId);
         }
         if(friend.get().isActive()){
-            throw new IllegalFriendActionException("You are already friends with user:" + userId);
+            throw new IllegalFriendActionException("You are already friends with user:" + followerId);
         }
         friend.get().setActive(true);
         friendRepository.save(friend.get());
@@ -188,39 +195,46 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void rejectFollowRequest(int userId, String username) {
+    public void rejectFollowRequest(int userId, int followerId, String username) {
         // check that the person cancelling the request exists
-        User user = verifyAndReturnUser(username);
+        User user = verifyAndReturnUser(userId);
         // check that the user that requested exists
-        User requester = verifyAndReturnUser(userId);
-
+        User follower = verifyAndReturnUser(followerId);
+        // check that the user id and username belong to the same user
+        if(!user.getUsername().equals(username)){
+            throw new AuthorisationException("You do not have the required permission to complete this operation");
+        }
         //check to see if that follow relationship exists
-        Optional<Friend> friend = friendRepository.findById(new Friend.Key(requester, user));
-        if(!friend.isPresent()){
-            throw new IllegalFriendActionException("There is no request from:" + userId);
+        Optional<Friend> friendship = friendRepository.findById(new Friend.Key(follower, user));
+        if(!friendship.isPresent()){
+            throw new IllegalFriendActionException("There is no request from:" + followerId);
         }
 
         // delete the friend relationship from the database, whether friends or not
-        friendRepository.delete(friend.get());
+        friendRepository.delete(friendship.get());
 
     }
 
     @Override
     @Transactional
-    public void unFollowUser(int userId, String username) {
+    public void unFollowUser(int userId, int friendId, String username) {
         // check that the person cancelling the request exists
-        User user = verifyAndReturnUser(username);
+        User user = verifyAndReturnUser(userId);
         // check that the user that requested exists
-        User requester = verifyAndReturnUser(userId);
+        User friend = verifyAndReturnUser(friendId);
+        // check that the user id and username belong to the same user
+        if(!user.getUsername().equals(username)){
+            throw new AuthorisationException("You do not have the required permission to complete this operation");
+        }
 
         //check to see if that follow relationship exists
-        Optional<Friend> friend = friendRepository.findById(new Friend.Key(user, requester));
-        if(!friend.isPresent()){
-            throw new IllegalFriendActionException("You are not following:" + userId);
+        Optional<Friend> friendship = friendRepository.findById(new Friend.Key(user, friend));
+        if(!friendship.isPresent()){
+            throw new IllegalFriendActionException("You are not following:" + friendId);
         }
 
         // delete the friend relationship from the database, whether friends or not
-        friendRepository.delete(friend.get());
+        friendRepository.delete(friendship.get());
     }
 
     @Override

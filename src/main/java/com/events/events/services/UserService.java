@@ -54,9 +54,11 @@ public interface UserService extends UserDetailsService {
     /**
      * This method is used to add a friend to user
      * @param userId
+     * @param friendId
      * @param username
      */
-    void addFriend(int userId, String username);
+    @PreAuthorize("#username == authentication.principal.username")
+    void addFriend(int userId, int friendId, String username);
 
     /**
      * This method returns all the users that this particular user is following"
@@ -74,21 +76,29 @@ public interface UserService extends UserDetailsService {
     /**
      * This method that accepts a follow request from the user with the given id
      * @param userId
+     * @param followerId
+     * @param username
      */
-    void acceptFollowRequest(int userId, String username);
+    @PreAuthorize("#username == authentication.principal.username")
+    void acceptFollowRequest(int userId, int followerId, String username);
 
     /**
      * This is a method to reject a follow request from the user with the given id
      * @param userId
+     * @param followerId
+     * @param username
      */
-    void rejectFollowRequest(int userId, String username);
+    @PreAuthorize("#username == authentication.principal.username")
+    void rejectFollowRequest(int userId, int followerId, String username);
 
     /**
      * This is a method to stop following someone
      * @param userId
+     * @param friendId
      * @param username
      */
-    void unFollowUser(int userId, String username);
+    @PreAuthorize("#username == authentication.principal.username")
+    void unFollowUser(int userId, int friendId, String username);
 
 
     List<Event> listEventsByUser(int userId);

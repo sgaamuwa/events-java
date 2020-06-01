@@ -14,7 +14,7 @@ import java.util.Map;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
-@RequestMapping("/account")
+@RequestMapping("/v1/account")
 public class AccountController {
 
     @Autowired
