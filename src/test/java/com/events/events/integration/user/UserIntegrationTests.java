@@ -30,16 +30,12 @@ public class UserIntegrationTests extends BaseIntegrationTest{
     @Autowired
     private MockMvc mockMvc;
 
-    private User user, user2;
-
     @MockBean
     private Principal mockPrincipal;
 
 
     @Before
     public void setup(){
-        user = new User("samuel", "gaamuwa","sgaamuwa", "password", "sgaamuwa@gmail.com");
-        user2 = new User("joy", "bawaya", "jbawaya", "password", "jbawaya@gmail.com");
         mockPrincipal = Mockito.mock(Principal.class);
         Mockito.when(mockPrincipal.getName()).thenReturn("samuelgaamuwa");
 
