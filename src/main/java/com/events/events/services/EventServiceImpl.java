@@ -8,11 +8,14 @@ import com.events.events.models.Friend;
 import com.events.events.models.User;
 import com.events.events.repository.EventRepository;
 import com.events.events.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
@@ -21,6 +24,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class EventServiceImpl implements EventService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventServiceImpl.class);
 
     @Autowired
     private EventRepository eventRepository;
@@ -31,10 +36,16 @@ public class EventServiceImpl implements EventService {
     @Autowired
     private JavaMailSender javaMailSender;
 
+    @Autowired
+    private AWSS3Service awss3Service;
+
     @Override
     @Transactional
     public Event saveEvent(Event event) {
+        LOGGER.info("Saving event");
         if(event.getDate().isBefore(LocalDate.now().plusDays(1))){
+            LOGGER.info("Saving event failed");
+            LOGGER.error("Event was not in the acceptable range ");
             throw new InvalidDateException("Event date must be at least a day from now");
         }
         return eventRepository.save(event);
@@ -52,12 +63,17 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public Event updateEvent(int eventId, int userId, Event event) {
+        LOGGER.info(String.format("Updating event id: %d by user id: %d", eventId, userId));
         User user = verifyAndReturnUser(userId);
         if(!eventRepository.existsById(eventId)){
+            LOGGER.info("Updating event failed");
+            LOGGER.error("Event id: " + eventId + " does not exist");
             throw new NotFoundException("Event with id: "+eventId+" not found");
         }
         // check if the event was created by the person trying to update it
         if(!eventRepository.findById(eventId).get().getCreator().equals(user)){
+            LOGGER.info("Updating event failed");
+            LOGGER.error("User does not have permission to update the event");
             throw new AuthorisationException("You do not have the required permission to complete this operation");
         }
         event.setEventId(eventId);
@@ -65,11 +81,22 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public Event uploadEventImage(int eventId, int userId, MultipartFile multipartFile) {
+        User user = verifyAndReturnUser(userId);
+        Event event = verifyAndReturnEvent(eventId);
+        String fileName = awss3Service.uploadFile(multipartFile);
+        return event;
+    }
+
+    @Override
     @Transactional
     public void deleteEvent(int eventId, int userId) {
+        LOGGER.info(String.format("Deleting event id: %d by user id: %d", eventId, userId));
         Event event = verifyAndReturnEvent(eventId);
         User user = verifyAndReturnUser(userId);
         if(!event.getCreator().equals(user)){
+            LOGGER.info("Deleting event failed");
+            LOGGER.error("User does not have permission to delete the event");
             throw new AuthorisationException("You do not have the required permission to complete this operation");
         }
         eventRepository.delete(event);
@@ -78,12 +105,14 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public Event getEventById(int eventId) {
+        LOGGER.info("Get Event Id: "+eventId+" started");
         return verifyAndReturnEvent(eventId);
     }
 
     @Override
     @Transactional
     public List<Event> getAllEvents() {
+        LOGGER.info("Get All events started");
         List<Event> events = eventRepository.findAll();
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events");
@@ -94,8 +123,11 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public List<Event> getAllEventsForUser(String username){
+        LOGGER.info(String.format("Getting all events for user: %s started", username));
         Optional<User> user = userRepository.findByUsername(username);
         if(!user.isPresent()){
+            LOGGER.info("Deleting event failed");
+            LOGGER.error("User with username: "+username+ " does not exist" );
             throw new UsernameNotFoundException("User with username: "+username+" does not exist");
         }
         //set a check to make sure that the friend is active
@@ -106,20 +138,28 @@ public class EventServiceImpl implements EventService {
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events");
         }
+        LOGGER.info("Get All Events for user completed");
         return events;
     }
 
     @Override
     @Transactional
     public Event addMultipleParticipantsToEvent(int eventId, int[] participants) {
+        LOGGER.info(String.format("Add participants: %s to event, event id: %d started", participants.toString(), eventId));
         // retrieve the users and event
         Integer[] userIds = Arrays.stream(participants).boxed().toArray(Integer[]::new);
         List<User> users = userRepository.findAllById(new ArrayList<>(Arrays.asList(userIds)));
 
         //check the returned objects are not empty
         if(users.isEmpty()){
+            LOGGER.info("Add participants to event failed");
+            LOGGER.error("Users with the supplied ids do not exist" );
+
             throw new NotFoundException("No users with the provided ids");
         }else if(!eventRepository.findById(eventId).isPresent()){
+            LOGGER.info("Add participants to event failed");
+            LOGGER.error("Event with the id: "+eventId+"not found" );
+
             throw new NotFoundException("Event with id: "+eventId+" not found");
         }
 
@@ -135,13 +175,14 @@ public class EventServiceImpl implements EventService {
         newParticipantsList.addAll(users);
         event.setParticipants(newParticipantsList);
 
+        LOGGER.info(String.format("Add participants: %s to event, event id: %d completed", participants.toString(), eventId));
         return eventRepository.save(event);
     }
 
     @Override
     @Transactional
     public Event addSingleParticipantToEvent(int eventId, int userId) {
-
+        LOGGER.info(String.format("Add participant: %d to event, event id: %d started", userId, eventId));
         User user = verifyAndReturnUser(userId);
         Event event = verifyAndReturnEvent(eventId);
         // check that the event date has not passed
@@ -153,60 +194,77 @@ public class EventServiceImpl implements EventService {
             participants.add(user);
             event.setParticipants(participants);
         }else{
+            LOGGER.info("Add participants to event failed");
+            LOGGER.error("User with id: "+userId+" is already a participant" );
             throw new DuplicateCreationException("User with id: "+userId+" is already a participant");
         }
+        LOGGER.info(String.format("Add participant: %d to event, event id: %d completed", userId, eventId));
         return eventRepository.save(event);
     }
 
     @Override
     @Transactional
     public List<Event> getEventsByDate(LocalDate date) {
+        LOGGER.info(String.format("Get events by date: %s started", date.toString()));
+
         List<Event> events = eventRepository.findByDate(date);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events for the date: "+ date);
         }
+
+        LOGGER.info(String.format("Get events by date: %s completed", date.toString()));
         return events;
     }
 
     @Override
     @Transactional
     public List<Event> getEventsBetweenDates(LocalDate dateFrom, LocalDate dateTo) {
+        LOGGER.info(String.format("Get events between date: %s and date: %s started", dateFrom.toString(), dateTo.toString()));
         List<Event> events = eventRepository.findByDateBetween(dateFrom, dateTo);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events for between the dates: "+ dateFrom + " and "+ dateTo);
         }
+        LOGGER.info(String.format("Get events between date: %s and date: %s completed", dateFrom.toString(), dateTo.toString()));
         return events;
     }
 
     @Override
     @Transactional
     public List<Event> getEventsAfterDate(LocalDate date) {
+        LOGGER.info(String.format("Get events after date: %s started", date.toString()));
         List<Event> events = eventRepository.findByDateGreaterThan(date);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events after the date: "+ date);
         }
+        LOGGER.info(String.format("Get events after date: %s completed", date.toString()));
         return events;
     }
 
     @Override
     @Transactional
     public List<Event> getEventsBeforeDate(LocalDate date) {
+        LOGGER.info(String.format("Get events before date: %s started", date.toString()));
         List<Event> events = eventRepository.findByDateLessThan(date);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events before the date: "+ date);
         }
+        LOGGER.info(String.format("Get events by date: %s completed", date.toString()));
         return events;
     }
 
     @Override
     @Transactional
     public void cancelEvent(int eventId) {
+        LOGGER.info(String.format("Cancel event, eventId: %d started", eventId));
         Event event = verifyAndReturnEvent(eventId);
         if(event.getEventStatus() == EventStatus.OPEN){
             event.setEventStatus(EventStatus.CANCELLED);
         }else{
+            LOGGER.info("Add participants to event failed");
+            LOGGER.error("Event is not open and can't be cancelled" );
             throw new DuplicateCreationException("Can only cancel OPEN events");
         }
+        LOGGER.info(String.format("Cancel event, eventId: %d completed", eventId));
         eventRepository.save(event);
     }
 

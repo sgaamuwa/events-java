@@ -2,6 +2,7 @@ package com.events.events.services;
 
 import com.events.events.models.Event;
 import com.events.events.models.User;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,6 +29,15 @@ public interface EventService {
      * @return Event
      */
     Event updateEvent(int eventId, int userId, Event event);
+
+    /**
+     * This is a method to upload an image for a given event
+     * @param eventId
+     * @param multipartFile
+     * @param userId
+     * @return
+     */
+    Event uploadEventImage(int eventId, int userId, MultipartFile multipartFile);
 
     /**
      * This is a method that deletes and event based on the id
