@@ -13,16 +13,12 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/events")
+@RequestMapping("/v1/events")
 public class EventController {
 
     @Autowired
     private EventService eventService;
 
-    @RequestMapping(method = RequestMethod.POST)
-    public Event createEvent(@Valid @RequestBody Event event, Principal principal){
-        return eventService.saveEvent(event, principal.getName());
-    }
 
     @RequestMapping(method = RequestMethod.GET)
     public List<Event> getAllEvents(){
@@ -59,14 +55,10 @@ public class EventController {
         return eventService.getEventById(id);
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    public void deleteEventById(@PathVariable("id") int id){
-        eventService.deleteEvent(id);
-    }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public Event updateEventById(@PathVariable("id") int id, @Valid @RequestBody Event event){
-        return eventService.updateEvent(id, event);
+    @RequestMapping(value = "/{id}/participants/{userId}", method = RequestMethod.POST)
+    public Event addParticipantToEvent(@PathVariable("id") int id, @PathVariable("userId") int userId){
+        return eventService.addSingleParticipantToEvent(id, userId);
     }
 
 

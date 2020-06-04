@@ -26,3 +26,6 @@ jobs:
           key: events-java-{{ checksum "pom.xml" }}
       
       - run: mvn test
+
+      - store_test_results:
+          path: target/surefire-reports

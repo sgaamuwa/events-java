@@ -1,12 +1,14 @@
 package com.events.events.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;;
 
 import javax.persistence.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.*;
@@ -16,16 +18,19 @@ import java.util.*;
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"},
         allowGetters = true)
 @Table(name = "events")
-public class Event extends ResourceSupport {
+public class Event extends RepresentationModel<Event> {
 
     @Id
     @GeneratedValue
     private int eventId;
 
     @Column(nullable = false)
+    @NotEmpty
     private String title;
 
     private String location;
+
+    private String description;
 
     private URL link;
 
@@ -56,20 +61,21 @@ public class Event extends ResourceSupport {
     }
 
     public Event(String title, String location, LocalDate date, User creator) {
+        this();
         this.title = title;
         this.location = location;
         this.date = date;
         this.creator = creator;
-        this.participants = new HashSet<>();
     }
 
-    public Event(String title, String location, URL link, LocalDate date, User creator) {
-        this.title = title;
-        this.location = location;
-        this.link = link;
-        this.date = date;
-        this.creator = creator;
-        this.participants = new HashSet<>();
+    public Event(String title, String location, String description, LocalDate date, User creator) {
+        this(title, location, date, creator);
+        this.description = description;
+    }
+
+    public Event(String title, String location, String description, String link, LocalDate date, User creator) throws MalformedURLException {
+        this(title, location, description, date, creator);
+        this.link = new URL(link);
     }
 
     public Event(String title, String location, URL link, LocalDate date, User creator, Set<User> participants) {
@@ -103,6 +109,14 @@ public class Event extends ResourceSupport {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public URL getLink() {

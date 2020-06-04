@@ -1,16 +1,13 @@
 package com.events.events.services;
 
 
-import com.events.events.error.DuplicateCreationException;
-import com.events.events.error.EmptyListException;
-import com.events.events.error.InvalidDateException;
+import com.events.events.error.*;
 import com.events.events.models.Event;
 import com.events.events.models.EventStatus;
 import com.events.events.models.Friend;
 import com.events.events.models.User;
 import com.events.events.repository.EventRepository;
 import com.events.events.repository.UserRepository;
-import com.events.events.error.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -45,21 +42,23 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public Event saveEvent(Event event, String username) {
-        Optional<User> user = userRepository.findByUsername(username);
-        if(!user.isPresent()){
-            throw new UsernameNotFoundException("User with username: "+username+" does not exist");
-        }
-        event.setCreator(user.get());
-        checkUserDoesNotHaveEventOnSameDay(user.get(), event.getDate());
+    public Event saveEvent(Event event, int userId) {
+        User user = verifyAndReturnUser(userId);
+        event.setCreator(user);
+        checkUserDoesNotHaveEventOnSameDay(user, event.getDate());
         return saveEvent(event);
     }
 
     @Override
     @Transactional
-    public Event updateEvent(int eventId, Event event) {
+    public Event updateEvent(int eventId, int userId, Event event) {
+        User user = verifyAndReturnUser(userId);
         if(!eventRepository.existsById(eventId)){
             throw new NotFoundException("Event with id: "+eventId+" not found");
+        }
+        // check if the event was created by the person trying to update it
+        if(!eventRepository.findById(eventId).get().getCreator().equals(user)){
+            throw new AuthorisationException("You do not have the required permission to complete this operation");
         }
         event.setEventId(eventId);
         return eventRepository.save(event);
@@ -67,8 +66,12 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public void deleteEvent(int eventId) {
+    public void deleteEvent(int eventId, int userId) {
         Event event = verifyAndReturnEvent(eventId);
+        User user = verifyAndReturnUser(userId);
+        if(!event.getCreator().equals(user)){
+            throw new AuthorisationException("You do not have the required permission to complete this operation");
+        }
         eventRepository.delete(event);
     }
 
@@ -168,7 +171,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public List<Event> getEventsBetweenDates(LocalDate dateFrom, LocalDate dateTo) {
-        List<Event> events = eventRepository.getEventsBetweenDates(dateFrom, dateTo);
+        List<Event> events = eventRepository.findByDateBetween(dateFrom, dateTo);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events for between the dates: "+ dateFrom + " and "+ dateTo);
         }
@@ -178,7 +181,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public List<Event> getEventsAfterDate(LocalDate date) {
-        List<Event> events = eventRepository.getEventsAfterDate(date);
+        List<Event> events = eventRepository.findByDateGreaterThan(date);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events after the date: "+ date);
         }
@@ -188,7 +191,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public List<Event> getEventsBeforeDate(LocalDate date) {
-        List<Event> events = eventRepository.getEventsBeforeDate(date);
+        List<Event> events = eventRepository.findByDateLessThan(date);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events before the date: "+ date);
         }

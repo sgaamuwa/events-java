@@ -1,5 +1,6 @@
 package com.events.events.unit.service;
 
+import com.events.events.error.AuthorisationException;
 import com.events.events.error.DuplicateCreationException;
 import com.events.events.error.InvalidDateException;
 import com.events.events.error.NotFoundException;
@@ -24,6 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -59,9 +61,13 @@ public class EventServiceImplTest {
     private User male = new User("michael", "male", "mmale", "pass123", "mmale@email.com");
     private Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now().plusDays(3), samuel);
     private Event beach = new Event("Beach", "Entebbe", LocalDate.now().plusDays(3), samuel);
+    private User bruce = new User("bruce", "bigirwenkya", "bbigirwenkya", "pass123", "bbigirwenkya@email.com");
+
+
     @Before
     public void setup(){
         Mockito.when(userRepository.findById(1)).thenReturn(Optional.of(male));
+        Mockito.when(userRepository.findById(2)).thenReturn(Optional.of(bruce));
         Mockito.when(eventRepository.findById(1)).thenReturn(Optional.of(cinemaMovie));
         Mockito.when(eventRepository.findById(2)).thenReturn(Optional.of(beach));
         Mockito.when(userRepository.findById(23)).thenReturn(Optional.empty());
@@ -153,19 +159,29 @@ public class EventServiceImplTest {
 
     @Test
     public void testDeleteEventWithValidId(){
-        Event event = Mockito.mock(Event.class);
+        Event event = new Event("Movie", "Acacia Mall", LocalDate.now().plusDays(2), male);
         Mockito.when(eventRepository.findById(new Integer(1))).thenReturn(Optional.of(event));
-        eventService.deleteEvent(1);
+        eventService.deleteEvent(1, 1);
         Mockito.verify(eventRepository, Mockito.atMost(1)).delete(event);
     }
 
     @Test
-    public void testDeleteEventWithInvalidId(){
+    public void testDeleteEventWithInvalidEventId(){
 
         Throwable exception = assertThrows(NotFoundException.class, () -> {
-            eventService.deleteEvent(12);
+            eventService.deleteEvent(12, 1);
         });
         Assert.assertEquals("Event with id: 12 not found", exception.getMessage());
+        Mockito.verify(eventRepository, Mockito.never()).delete(any(Event.class));
+    }
+
+    @Test
+    public void testDeleteEventWithInvalidUserID(){
+        Event event = new Event("Movie", "Acacia Mall", LocalDate.now().plusDays(2), bruce);
+        Mockito.when(eventRepository.findById(new Integer(1))).thenReturn(Optional.of(event));
+        Throwable exception = assertThrows(AuthorisationException.class, () -> {
+            eventService.deleteEvent(1, 1);
+        });
         Mockito.verify(eventRepository, Mockito.never()).delete(any(Event.class));
     }
 

@@ -6,7 +6,9 @@ import com.events.events.models.Event;
 import com.events.events.models.EventStatus;
 import com.events.events.models.User;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -30,10 +32,17 @@ public class EventRepositoryTest {
     @Autowired
     private EventRepository eventRepository;
 
-    private User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123", "sgaamuwa@email.com");
+    private User samuel = new User("martha", "kyozira", "mkyozira", "pass123", "mkyozira@email.com");
     private Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now(), samuel);
     private User male = new User("michael", "male", "mmale", "pass123", "mmale@email.com");
     private User bruce = new User("bruce", "bigirwenyka", "bbigirwenkya", "pass123", "bbigirwenkya@email.com");
+
+    @Before
+    public void setup(){
+        entityManager.persist(samuel);
+        entityManager.persist(male);
+        entityManager.persist(bruce);
+    }
 
     @Test
     public void canAddUsersToAnEvent(){
@@ -55,9 +64,7 @@ public class EventRepositoryTest {
     @Test
     public void canGetEventsByDate(){
         //save an event
-        entityManager.persist(samuel);
         entityManager.persist(cinemaMovie);
-        entityManager.flush();
         // retrieve it by date
         List<Event> events = eventRepository.findByDate(LocalDate.now());
 
@@ -71,13 +78,12 @@ public class EventRepositoryTest {
         Event jumping = new Event("jumping", "Jinja", LocalDate.now().plusDays(3), samuel);
         Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now(), samuel);
 
-        entityManager.persist(samuel);
         entityManager.persist(beach);
         entityManager.persist(jumping);
         entityManager.persist(cinemaMovie);
 
-        Assert.assertEquals(eventRepository.getEventsBetweenDates(LocalDate.now(), LocalDate.now().plusDays(2)).size(), 2);
-        Assert.assertEquals(eventRepository.getEventsBetweenDates(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)).size(), 1);
+        Assert.assertEquals(eventRepository.findByDateBetween(LocalDate.now(), LocalDate.now().plusDays(2)).size(), 4);
+        Assert.assertEquals(eventRepository.findByDateBetween(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)).size(), 2);
     }
 
     @Test
@@ -86,29 +92,27 @@ public class EventRepositoryTest {
         Event jumping = new Event("jumping", "Jinja", LocalDate.now().plusDays(3), samuel);
         Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now(), samuel);
 
-        entityManager.persist(samuel);
         entityManager.persist(beach);
         entityManager.persist(jumping);
         entityManager.persist(cinemaMovie);
 
-        Assert.assertEquals(eventRepository.getEventsAfterDate(LocalDate.now().plusDays(1)).size(), 2);
-        Assert.assertEquals(eventRepository.getEventsAfterDate(LocalDate.now().minusDays(1)).size(), 3);
+        Assert.assertEquals(eventRepository.findByDateGreaterThan(LocalDate.now().plusDays(1)).size(), 8);
+        Assert.assertEquals(eventRepository.findByDateGreaterThan(LocalDate.now().minusDays(1)).size(), 10);
     }
 
     @Test
     public void canGetEventsBeforeCertainDate(){
         Event beach = new Event("beach", "Entebbe", LocalDate.now().plusDays(2), samuel);
-        Event jumping = new Event("jumping", "Jinja", LocalDate.now().plusDays(3), samuel);
+        Event jumping = new Event("jumping", "Mauritious", LocalDate.now().plusDays(3), samuel);
         Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now(), samuel);
 
-        entityManager.persist(samuel);
         entityManager.persist(beach);
         entityManager.persist(jumping);
         entityManager.persist(cinemaMovie);
 
-        Assert.assertEquals(eventRepository.getEventsBeforeDate(LocalDate.now().plusDays(1)).size(), 1);
-        Assert.assertEquals(eventRepository.getEventsBeforeDate(LocalDate.now().minusDays(1)).size(), 0);
-        Assert.assertEquals(eventRepository.getEventsBeforeDate(LocalDate.now().plusDays(4)).size(), 3);
+        Assert.assertEquals(eventRepository.findByDateLessThan(LocalDate.now().plusDays(1)).size(), 1);
+        Assert.assertEquals(eventRepository.findByDateLessThan(LocalDate.now().minusDays(1)).size(), 0);
+        Assert.assertEquals(eventRepository.findByDateLessThan(LocalDate.now().plusDays(4)).size(), 6);
     }
 
     @Test
@@ -119,35 +123,30 @@ public class EventRepositoryTest {
 
         beach.setEventStatus(EventStatus.CANCELLED);
 
-        entityManager.persist(samuel);
         entityManager.persist(beach);
         entityManager.persist(jumping);
         entityManager.persist(cinemaMovie);
 
-        Assert.assertEquals(eventRepository.findByEventStatus(EventStatus.OPEN).size(), 2);
+        Assert.assertEquals(eventRepository.findByEventStatus(EventStatus.OPEN).size(), 9);
         Assert.assertEquals(eventRepository.findByEventStatus(EventStatus.CANCELLED).size(), 1);
         Assert.assertEquals(eventRepository.findByEventStatus(EventStatus.CANCELLED).get(0), beach);
     }
 
     @Test
     public void canFindAllEventsByUsersFriends(){
-        Event beach = new Event("beach", "Entebbe", LocalDate.now().plusDays(2), samuel);
+        Event beach = new Event("trip", "Namayiba", LocalDate.now().plusDays(2), samuel);
         Event jumping = new Event("jumping", "Jinja", LocalDate.now().plusDays(3), male);
         Event nightDancing = new Event("nightDancing", "mukono", LocalDate.now().plusDays(4), samuel);
         Event quidditch = new Event("quidditch", "hogwarts", LocalDate.now().plusDays(5), male);
         Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now(), bruce);
 
-        entityManager.persist(samuel);
-        entityManager.persist(male);
-        entityManager.persist(bruce);
         entityManager.persist(beach);
         entityManager.persist(jumping);
         entityManager.persist(cinemaMovie);
         entityManager.persist(nightDancing);
         entityManager.persist(quidditch);
-        entityManager.flush();
 
-        Assert.assertEquals(eventRepository.findAll().size(), 5);
+        Assert.assertEquals(eventRepository.findAll().size(), 12);
         Assert.assertEquals(eventRepository.findAllEventsByFriends(Arrays.asList(samuel.getUserId(), male.getUserId())).size(), 4);
     }
 

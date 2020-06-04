@@ -17,23 +17,23 @@ public interface EventService {
     /**
      * This method to save a new event when a user is supplied
      * @param event
-     * @param username
+     * @param userId
      * @return
      */
-    Event saveEvent(Event event, String username);
+    Event saveEvent(Event event, int userId);
 
     /**
      * This is a method to update an already existent event
      * @param event
      * @return Event
      */
-    Event updateEvent(int eventId, Event event);
+    Event updateEvent(int eventId, int userId, Event event);
 
     /**
      * This is a method that deletes and event based on the id
      * @param eventId
      */
-    void deleteEvent(int eventId);
+    void deleteEvent(int eventId, int userId);
 
     /**
      * This is a method to return one event based on the id

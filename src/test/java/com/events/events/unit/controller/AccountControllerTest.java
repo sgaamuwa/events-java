@@ -48,7 +48,7 @@ public class AccountControllerTest {
     @Test
     public void testControllerReturnsUserAfterRegistration() throws Exception{
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/account/register")
+                .post("/v1/account/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\n" +
                         "\t\"firstName\": \"samuel\",\n" +
@@ -65,7 +65,7 @@ public class AccountControllerTest {
     @Test
     public void testReturnsBadRequestWithEmptyString() throws Exception{
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/account/register")
+                .post("/v1/account/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("")
                 .characterEncoding("utf-8"))
@@ -76,7 +76,7 @@ public class AccountControllerTest {
     @Test
     public void testReturnsBadRequestWithoutUserName() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/account/register")
+                .post("/v1/account/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\n" +
                         "\t\"firstName\": \"samuel\",\n" +
@@ -91,7 +91,7 @@ public class AccountControllerTest {
     @Test
     public void testReturnsBadRequestWithoutPassword() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/account/register")
+                .post("/v1/account/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\n" +
                         "\t\"firstName\": \"samuel\",\n" +

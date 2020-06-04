@@ -3,19 +3,16 @@ package com.events.events.error;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(value = HttpStatus.NOT_ACCEPTABLE)
-public class IllegalFriendActionException extends RuntimeException {
-
+@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+public class AuthorisationException extends RuntimeException{
     private String message;
 
-    public IllegalFriendActionException(String message){
+    public AuthorisationException(String message){
         this.message = message;
     }
 
     @Override
     public String getMessage(){
-        return this.message;
+        return message;
     }
-
-
 }
