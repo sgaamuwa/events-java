@@ -2,11 +2,12 @@ package com.events.events.services;
 
 import com.events.events.models.Event;
 import com.events.events.models.User;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 public interface UserService extends UserDetailsService {
 
@@ -41,6 +42,21 @@ public interface UserService extends UserDetailsService {
      * @param userId
      */
     void deleteUser(int userId);
+
+    /**
+     * This method uploads a user's image and updates the user's object
+     * @param userId
+     * @param multipartFile
+     * @return
+     */
+    User uploadUserImage(int userId, MultipartFile multipartFile);
+
+    /**
+     * This method downloads the user's image given the user's id
+     * @param userId
+     * @return
+     */
+    ByteArrayResource downloadUserImage(int userId);
 
     /**
      * This method changes the password of the user to the new one provided

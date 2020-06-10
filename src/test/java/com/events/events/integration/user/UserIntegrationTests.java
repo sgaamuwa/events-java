@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.Matchers.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -49,7 +50,9 @@ public class UserIntegrationTests extends BaseIntegrationTest{
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().string("[{\"userId\":91,\"firstName\":\"Samuel\",\"lastName\":\"Gaamuwa\",\"username\":\"samuelgaamuwa\",\"email\":\"sgaamuwa@gmail.com\",\"createdAt\":\""+LocalDate.now()+"\",\"updatedAt\":\""+LocalDate.now()+"\",\"enabled\":true,\"links\":[]},{\"userId\":92,\"firstName\":\"Joy\",\"lastName\":\"Bawaya\",\"username\":\"jbawaya\",\"email\":\"jbawaya@gmail.com\",\"createdAt\":\""+LocalDate.now()+"\",\"updatedAt\":\""+LocalDate.now()+"\",\"enabled\":true,\"links\":[]},{\"userId\":93,\"firstName\":\"Sandra\",\"lastName\":\"Nazziwa\",\"username\":\"snazziwa\",\"email\":\"snazziwa@gmail.com\",\"createdAt\":\""+LocalDate.now()+"\",\"updatedAt\":\""+LocalDate.now()+"\",\"enabled\":true,\"links\":[]},{\"userId\":94,\"firstName\":\"Merab\",\"lastName\":\"Gaamuwa\",\"username\":\"mgaamuwa\",\"email\":\"mgaamuwa@gmail.com\",\"createdAt\":\""+LocalDate.now()+"\",\"updatedAt\":\""+LocalDate.now()+"\",\"enabled\":true,\"links\":[]},{\"userId\":95,\"firstName\":\"Edward\",\"lastName\":\"Gaamuwa\",\"username\":\"egaamuwa\",\"email\":\"egaamuwa@gmail.com\",\"createdAt\":\""+LocalDate.now()+"\",\"updatedAt\":\""+LocalDate.now()+"\",\"enabled\":true,\"links\":[]},{\"userId\":96,\"firstName\":\"Peace\",\"lastName\":\"Nakiyemba\",\"username\":\"pnakiyemba\",\"email\":\"pnakiyemba@gmail.com\",\"createdAt\":\""+LocalDate.now()+"\",\"updatedAt\":\""+LocalDate.now()+"\",\"enabled\":true,\"links\":[]}]"));
+                .andExpect(jsonPath("$[0].userId", is(91)))
+                .andExpect(jsonPath("$[0].username", is("samuelgaamuwa")))
+                .andExpect(jsonPath("$", hasSize(6)));
     }
 
     @Test
@@ -91,7 +94,8 @@ public class UserIntegrationTests extends BaseIntegrationTest{
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotAcceptable())
-                .andExpect(content().string("{\"status\":\"NOT_ACCEPTABLE\",\"message\":\"User is already following or requested to follow user with Id: 92\"}"));
+                .andExpect(jsonPath("$.status", is("NOT_ACCEPTABLE")))
+                .andExpect(jsonPath("$.message", is("User is already following or requested to follow user with Id: 92")));
     }
 
     @Test
@@ -102,7 +106,9 @@ public class UserIntegrationTests extends BaseIntegrationTest{
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().string("[{\"userId\":92,\"firstName\":\"Joy\",\"lastName\":\"Bawaya\",\"username\":\"jbawaya\",\"email\":\"jbawaya@gmail.com\",\"createdAt\":\""+LocalDate.now()+"\",\"updatedAt\":\""+LocalDate.now()+"\",\"enabled\":true,\"links\":[]},{\"userId\":93,\"firstName\":\"Sandra\",\"lastName\":\"Nazziwa\",\"username\":\"snazziwa\",\"email\":\"snazziwa@gmail.com\",\"createdAt\":\""+LocalDate.now()+"\",\"updatedAt\":\""+LocalDate.now()+"\",\"enabled\":true,\"links\":[]}]"));
+                .andExpect(jsonPath("$[0].userId", is(92)))
+                .andExpect(jsonPath("$[1].userId", is(93)))
+                .andExpect(jsonPath("$", hasSize(2)));
     }
 
 

@@ -10,6 +10,7 @@ import com.events.events.models.Friend;
 import com.events.events.models.User;
 import com.events.events.repository.EventRepository;
 import com.events.events.repository.UserRepository;
+import com.events.events.services.AWSS3Service;
 import com.events.events.services.EventService;
 import com.events.events.services.EventServiceImpl;
 import org.junit.Assert;
@@ -17,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -50,6 +52,9 @@ public class EventServiceImplTest {
 
     @MockBean
     private JavaMailSender javaMailSender;
+
+    @MockBean
+    private AWSS3Service awss3Service;
 
     @MockBean
     private EventRepository eventRepository;
