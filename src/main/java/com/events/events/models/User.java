@@ -41,6 +41,8 @@ public class User extends RepresentationModel<User> {
     @Email
     private String email;
 
+    private String imageKey;
+
     private String accessToken;
 
     private String facebookId;
@@ -139,6 +141,14 @@ public class User extends RepresentationModel<User> {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getImageKey() {
+        return imageKey;
+    }
+
+    public void setImageKey(String imageKey) {
+        this.imageKey = imageKey;
     }
 
     @JsonIgnore

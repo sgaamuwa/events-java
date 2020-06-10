@@ -3,9 +3,12 @@ package com.events.events.controllers;
 import com.events.events.models.User;
 import com.events.events.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.List;
@@ -32,6 +35,16 @@ public class UserController {
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public void deleteUserById(@PathVariable("id") int id){
         userService.deleteUser(id);
+    }
+
+    @RequestMapping(value = "/{id}/uploadImage", method = RequestMethod.POST)
+    public User uploadImageForUserById(@PathVariable("id") int id, @RequestPart(value = "image") MultipartFile multipartFile){
+        return userService.uploadUserImage(id, multipartFile);
+    }
+
+    @RequestMapping(value = "/{id}/downloadImage", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<ByteArrayResource> downloadImageForUserById(@PathVariable("id") int id){
+        return new ResponseEntity<>(userService.downloadUserImage(id), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}/followers", method = RequestMethod.GET)

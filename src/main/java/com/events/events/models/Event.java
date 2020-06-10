@@ -34,6 +34,8 @@ public class Event extends RepresentationModel<Event> {
 
     private URL link;
 
+    private String imageKey;
+
     private LocalDate date;
 
     private Currency cost;
@@ -117,6 +119,14 @@ public class Event extends RepresentationModel<Event> {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getImageKey() {
+        return imageKey;
+    }
+
+    public void setImageKey(String imageKey) {
+        this.imageKey = imageKey;
     }
 
     public URL getLink() {

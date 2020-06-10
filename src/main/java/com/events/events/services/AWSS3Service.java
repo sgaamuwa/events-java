@@ -9,10 +9,10 @@ public interface AWSS3Service {
      * @param multipartFile
      * @return
      */
-    String uploadFile(final MultipartFile multipartFile);
+    String uploadFile(final MultipartFile multipartFile, String folder);
 
 
-    void downloadFile(final String fileName);
+    byte[] downloadFile(final String fileName);
 
     /**
      * Deletes the file given the filename

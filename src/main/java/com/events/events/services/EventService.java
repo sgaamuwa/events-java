@@ -2,6 +2,7 @@ package com.events.events.services;
 
 import com.events.events.models.Event;
 import com.events.events.models.User;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -38,6 +39,14 @@ public interface EventService {
      * @return
      */
     Event uploadEventImage(int eventId, int userId, MultipartFile multipartFile);
+
+    /**
+     * This method should return the image associated with an event
+     * @param eventId
+     * @param userId
+     * @return
+     */
+    ByteArrayResource downloadEventImage(int eventId, int userId);
 
     /**
      * This is a method that deletes and event based on the id

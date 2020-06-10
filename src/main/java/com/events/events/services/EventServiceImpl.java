@@ -11,6 +11,7 @@ import com.events.events.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -81,11 +82,27 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public Event uploadEventImage(int eventId, int userId, MultipartFile multipartFile) {
         User user = verifyAndReturnUser(userId);
         Event event = verifyAndReturnEvent(eventId);
-        String fileName = awss3Service.uploadFile(multipartFile);
-        return event;
+        if(!event.getCreator().equals(user)){
+            throw new AuthorisationException("You do not have the required permission to complete this operation");
+        }
+        // check if the event has an image already and delete it
+        if(!event.getImageKey().isEmpty()){
+            awss3Service.deleteFile(event.getImageKey());
+        }
+        String fileName = awss3Service.uploadFile(multipartFile, "eventImages");
+        event.setImageKey(fileName);
+        return eventRepository.save(event);
+    }
+
+    @Override
+    public ByteArrayResource downloadEventImage(int eventId, int userId){
+        Event event = verifyAndReturnEvent(eventId);
+        byte[] imageFile = awss3Service.downloadFile(event.getImageKey());
+        return new ByteArrayResource(imageFile);
     }
 
     @Override

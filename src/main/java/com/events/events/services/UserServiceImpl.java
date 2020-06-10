@@ -1,5 +1,6 @@
 package com.events.events.services;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.events.events.error.*;
 import com.events.events.models.ConfirmationToken;
 import com.events.events.models.Event;
@@ -9,6 +10,7 @@ import com.events.events.repository.ConfirmationTokenRepository;
 import com.events.events.repository.FriendRepository;
 import com.events.events.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,6 +19,7 @@ import org.springframework.social.InvalidAuthorizationException;
 import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.api.impl.FacebookTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.util.*;
@@ -26,6 +29,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private AWSS3Service awss3Service;
 
     @Autowired
     private UserRepository userRepository;
@@ -105,6 +111,26 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(int userId) {
         User user = verifyAndReturnUser(userId);
         userRepository.delete(user);
+    }
+
+    @Override
+    @Transactional
+    public User uploadUserImage(int userId, MultipartFile multipartFile) {
+        User user = verifyAndReturnUser(userId);
+        // check if the event has an image already and delete it
+        if(!user.getImageKey().isEmpty()){
+            awss3Service.deleteFile(user.getImageKey());
+        }
+        String fileName = awss3Service.uploadFile(multipartFile, "userImages");
+        user.setImageKey(fileName);
+        return userRepository.save(user);
+    }
+
+    @Override
+    public ByteArrayResource downloadUserImage(int userId) {
+        User user = verifyAndReturnUser(userId);
+        byte[] imageFile = awss3Service.downloadFile(user.getImageKey());
+        return new ByteArrayResource(imageFile);
     }
 
     @Override

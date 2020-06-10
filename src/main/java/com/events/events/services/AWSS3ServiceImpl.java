@@ -2,7 +2,11 @@ package com.events.events.services;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +33,12 @@ public class AWSS3ServiceImpl implements AWSS3Service{
 
     @Override
     @Async
-    public String uploadFile(MultipartFile multipartFile) {
+    public String uploadFile(MultipartFile multipartFile, String folder) {
         LOGGER.info("Uploading File to S3 in progress");
         String fileName = null;
         try{
             final File file = convertMultiPartFileToFile(multipartFile);
-            fileName = uploadFileToS3Bucket(bucketName, file);
+            fileName = uploadFileToS3Bucket(bucketName, file, folder);
             LOGGER.info("Upload complete");
             file.delete();
         }catch(AmazonServiceException exception){
@@ -46,14 +50,29 @@ public class AWSS3ServiceImpl implements AWSS3Service{
 
     @Override
     @Async
-    public void downloadFile(String fileName) {
-
+    public byte[] downloadFile(String fileName) {
+        LOGGER.info("Downloading File from S3");
+        byte[] content = null;
+        File file = new File(fileName);
+        final S3Object s3Object = amazonS3.getObject(bucketName, fileName);
+        final S3ObjectInputStream  s3ObjectInputStream = s3Object.getObjectContent();
+        try{
+            content = IOUtils.toByteArray(s3ObjectInputStream);
+            LOGGER.info("File Downloaded successfully");
+            s3Object.close();
+        }catch (IOException exception){
+            LOGGER.info("Error downloading file ="+ exception.getMessage());
+        }
+        return content;
     }
 
     @Override
     @Async
     public void deleteFile(String fileName) {
-
+        LOGGER.info("Deleting file with name = " + fileName);
+        final DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(bucketName, fileName);
+        amazonS3.deleteObject(deleteObjectRequest);
+        LOGGER.info("File deleted successfully");
     }
 
     private File convertMultiPartFileToFile(final MultipartFile multipartFile) {
@@ -68,8 +87,8 @@ public class AWSS3ServiceImpl implements AWSS3Service{
         return file;
     }
 
-    private String uploadFileToS3Bucket(final String bucketName, final File file) {
-        final String uniqueFileName = LocalDateTime.now() + "_" + file.getName();
+    private String uploadFileToS3Bucket(final String bucketName, final File file, final String folder) {
+        final String uniqueFileName = folder + "/" +LocalDateTime.now() + "_" + file.getName();
         LOGGER.info("Uploading file with name= " + uniqueFileName);
         final PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, uniqueFileName, file);
         amazonS3.putObject(putObjectRequest);
