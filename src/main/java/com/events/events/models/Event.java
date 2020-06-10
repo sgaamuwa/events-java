@@ -1,6 +1,8 @@
 package com.events.events.models;
 
+import com.events.events.models.serializers.CustomURLSerializer;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -34,6 +36,7 @@ public class Event extends RepresentationModel<Event> {
 
     private URL link;
 
+    @JsonSerialize(using = CustomURLSerializer.class)
     private String imageKey;
 
     private LocalDate date;
@@ -42,7 +45,7 @@ public class Event extends RepresentationModel<Event> {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties({"createdEvents", "attending", "createdAt", "updatedAt"})
+    @JsonIgnoreProperties({"createdEvents", "attending", "createdAt", "updatedAt", "enabled", "imageKey"})
     private User creator;
 
     @ManyToMany(mappedBy = "attending")

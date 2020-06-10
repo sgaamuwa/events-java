@@ -9,6 +9,8 @@ import com.events.events.models.User;
 import com.events.events.repository.ConfirmationTokenRepository;
 import com.events.events.repository.FriendRepository;
 import com.events.events.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -44,6 +46,8 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Override
     @Transactional
@@ -116,20 +120,28 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User uploadUserImage(int userId, MultipartFile multipartFile) {
+        LOGGER.info("Uploading image for user with id: "+ userId +" started");
         User user = verifyAndReturnUser(userId);
         // check if the event has an image already and delete it
-        if(!user.getImageKey().isEmpty()){
+        if(user.getImageKey() != null && !user.getImageKey().isEmpty()){
             awss3Service.deleteFile(user.getImageKey());
         }
         String fileName = awss3Service.uploadFile(multipartFile, "userImages");
         user.setImageKey(fileName);
+        LOGGER.info("Uploading image for user with id: "+ userId + " completed");
         return userRepository.save(user);
     }
 
     @Override
     public ByteArrayResource downloadUserImage(int userId) {
+        LOGGER.info("Downloading image for user with id: "+ userId +" started");
         User user = verifyAndReturnUser(userId);
+        if(user.getImageKey() == null){
+            LOGGER.error("User with id: " + userId + " doesn't have an image uploaded");
+            throw new NotFoundException("User does not have an image for this id");
+        }
         byte[] imageFile = awss3Service.downloadFile(user.getImageKey());
+        LOGGER.info("Downloading image for user with id: "+ userId + " completed");
         return new ByteArrayResource(imageFile);
     }
 

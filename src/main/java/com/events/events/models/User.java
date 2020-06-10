@@ -1,7 +1,9 @@
 package com.events.events.models;
 
 
+import com.events.events.models.serializers.CustomURLSerializer;
 import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -41,6 +43,7 @@ public class User extends RepresentationModel<User> {
     @Email
     private String email;
 
+    @JsonSerialize(using = CustomURLSerializer.class)
     private String imageKey;
 
     private String accessToken;

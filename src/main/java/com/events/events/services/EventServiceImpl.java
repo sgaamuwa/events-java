@@ -90,7 +90,7 @@ public class EventServiceImpl implements EventService {
             throw new AuthorisationException("You do not have the required permission to complete this operation");
         }
         // check if the event has an image already and delete it
-        if(!event.getImageKey().isEmpty()){
+        if(event.getImageKey() != null && !event.getImageKey().isEmpty()){
             awss3Service.deleteFile(event.getImageKey());
         }
         String fileName = awss3Service.uploadFile(multipartFile, "eventImages");

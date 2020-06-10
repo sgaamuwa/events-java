@@ -1,11 +1,9 @@
 package com.events.events.services;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDateTime;
 
 @Service
@@ -73,6 +72,17 @@ public class AWSS3ServiceImpl implements AWSS3Service{
         final DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(bucketName, fileName);
         amazonS3.deleteObject(deleteObjectRequest);
         LOGGER.info("File deleted successfully");
+    }
+
+    @Override
+    public URL getPreSignedUrl(String s3Key){
+        LocalDateTime expiration = LocalDateTime.now().plusHours(1);
+        LOGGER.info("Generating pre-signed URL.");
+        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, s3Key)
+                .withMethod(HttpMethod.GET)
+                .withExpiration(java.sql.Timestamp.valueOf(expiration));
+        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
+        return url;
     }
 
     private File convertMultiPartFileToFile(final MultipartFile multipartFile) {

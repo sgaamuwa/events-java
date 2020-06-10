@@ -2,6 +2,8 @@ package com.events.events.services;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URL;
+
 public interface AWSS3Service {
 
     /**
@@ -19,4 +21,11 @@ public interface AWSS3Service {
      * @param fileName
      */
     void deleteFile(final String fileName);
+
+    /**
+     * Returns a signed URL given the file name
+     * @param fileName
+     * @return
+     */
+    URL getPreSignedUrl(String fileName);
 }

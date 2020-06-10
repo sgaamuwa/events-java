@@ -9,6 +9,7 @@ import com.events.events.models.User;
 import com.events.events.repository.ConfirmationTokenRepository;
 import com.events.events.repository.FriendRepository;
 import com.events.events.repository.UserRepository;
+import com.events.events.services.AWSS3Service;
 import com.events.events.services.EmailService;
 import com.events.events.services.UserService;
 import com.events.events.services.UserServiceImpl;
@@ -25,6 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,6 +58,9 @@ public class UserServiceImplTest {
 
     @MockBean
     private EmailService emailService;
+
+    @MockBean
+    private AWSS3Service awss3Service;
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -309,6 +314,15 @@ public class UserServiceImplTest {
         Mockito.when(friendRepository.findById(new Friend.Key(joy, samuel))).thenReturn(Optional.of(friend));
         userService.unFollowUser(2,1, "jbawaya");
         Mockito.verify(friendRepository, Mockito.atMost(1)).delete(friend);
+    }
+
+    @Test
+    public void testCanUploadImageForUser(){
+        MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
+        Mockito.doNothing().when(awss3Service).deleteFile("fileName");
+        Mockito.when(awss3Service.uploadFile(multipartFile, "userImages")).thenReturn("myFileNameInS3");
+        User user = userService.uploadUserImage(1, multipartFile);
+        Assert.assertEquals(user.getImageKey(), "myFileNameInS3");
     }
 
 }
