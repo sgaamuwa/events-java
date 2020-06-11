@@ -2,10 +2,7 @@ package com.events.events.services;
 
 
 import com.events.events.error.*;
-import com.events.events.models.Event;
-import com.events.events.models.EventStatus;
-import com.events.events.models.Friend;
-import com.events.events.models.User;
+import com.events.events.models.*;
 import com.events.events.repository.EventRepository;
 import com.events.events.repository.UserRepository;
 import org.slf4j.Logger;
@@ -21,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service
@@ -152,11 +150,48 @@ public class EventServiceImpl implements EventService {
         //get the user ids for all the friends
         List<Integer> friendsUserIds = friends.stream().filter(friend -> friend.isActive()).map(friend -> friend.getFriend().getUserId()).collect(Collectors.toList());
         List<Event> events = eventRepository.findAllEventsByFriends(friendsUserIds);
+        //return events that are public or private ones where they have been invited
+        events = events.stream().filter(event -> event.getEventPermission().equals(EventPermission.PUBLIC) || event.getInvitees().contains(user)).collect(Collectors.toList());
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events");
         }
         LOGGER.info("Get All Events for user completed");
         return events;
+    }
+
+    @Override
+    @Transactional
+    public List<Event> getAllEventsCreatedByUser(int userId) {
+        LOGGER.info("Get All Events Created by User id: "+userId+" started");
+        User user = verifyAndReturnUser(userId);
+        if(user.getCreatedEvents().isEmpty()){
+            throw new EmptyListException("There are no events for the user: "+ userId);
+        }
+        LOGGER.info("Get All Events Created by User id: "+userId+" completed");
+        return user.getCreatedEvents();
+    }
+
+    @Override
+    @Transactional
+    public List<Event> getAllEventsUserIsAttending(int userId, String username) {
+        LOGGER.info("Get All Events User id: "+userId+" is attending started");
+        User user = checkUserIdBelongsToCurrentUser(userId, username);
+        if(user.getAttending().isEmpty()){
+            throw new EmptyListException("The user: "+userId+" is not attending any events");
+        }
+        LOGGER.info("Get All Events User id: "+userId+" is attending completed");
+        return user.getAttending();
+    }
+
+    @Override
+    public List<Event> getAllEventsUserIsInvitedTo(int userId, String username) {
+        LOGGER.info("Get All Events User id: "+userId+" is invited to started");
+        User user = checkUserIdBelongsToCurrentUser(userId, username);
+        if(user.getInvites().isEmpty()){
+            throw new EmptyListException("The user: "+userId+" has no invites");
+        }
+        LOGGER.info("Get All Events User id: "+userId+" is invited to completed");
+        return user.getInvites();
     }
 
     @Override
@@ -216,6 +251,31 @@ public class EventServiceImpl implements EventService {
             throw new DuplicateCreationException("User with id: "+userId+" is already a participant");
         }
         LOGGER.info(String.format("Add participant: %d to event, event id: %d completed", userId, eventId));
+        return eventRepository.save(event);
+    }
+
+    @Override
+    public Event addInviteesToEvent(int userId, int eventId, int[] inviteesList) {
+        LOGGER.info("Adding invitees to event id: "+ eventId);
+        User user = verifyAndReturnUser(userId);
+        Event event = verifyAndReturnEvent(eventId);
+
+        if(!event.getCreator().equals(user)){
+            LOGGER.info("Adding invitees failed");
+            LOGGER.error("User does not have permission to add invitees to the event");
+            throw new AuthorisationException("You do not have the required permission to complete this operation");
+        }
+        List<User> invitees = userRepository.findAllById(Arrays.stream(inviteesList).boxed().collect(Collectors.toList()));
+        // filter down the invitees to only those that follow the user
+        invitees = invitees.stream().filter(
+                invitee -> invitee.getFriends().stream().filter(
+                        friend -> friend.isActive()).collect(Collectors.toSet()
+                ).contains(new Friend(invitee, user))
+        ).collect(Collectors.toList());
+        // add them to the event invites
+        Set<User> eventInvitees = event.getInvitees();
+        eventInvitees.addAll(invitees);
+        event.setInvitees(eventInvitees);
         return eventRepository.save(event);
     }
 
@@ -286,14 +346,6 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    @Transactional
-    public List<Event> getEventsByUser(int userId){
-        User user = verifyAndReturnUser(userId);
-        List<Event> events = user.getCreatedEvents();
-        return events;
-    }
-
-    @Override
     public void sendEmail() {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo("sgaamuwa@gmail.com");
@@ -305,6 +357,7 @@ public class EventServiceImpl implements EventService {
     private Event verifyAndReturnEvent(int eventId){
         Optional<Event> event = eventRepository.findById(eventId);
         if(!event.isPresent()){
+            LOGGER.error("Event Id not found: "+ eventId);
             throw new NotFoundException("Event with id: "+eventId+" not found");
         }
         return event.get();
@@ -313,16 +366,29 @@ public class EventServiceImpl implements EventService {
     private User verifyAndReturnUser(int userId){
         Optional<User> user = userRepository.findById(userId);
         if(!user.isPresent()){
+            LOGGER.error("User Id not found: "+ userId);
             throw new NotFoundException("User with id: "+userId+" not found");
         }
         return user.get();
     }
 
+    private User checkUserIdBelongsToCurrentUser(int userId, String username){
+        // check that the user id and username belong to the same user
+        User user = verifyAndReturnUser(userId);
+        if(!user.getUsername().equals(username)){
+            LOGGER.error("User Id does not belong to current user");
+            throw new AuthorisationException("You do not have the required permission to complete this operation");
+        }
+        return user;
+    }
+
     private void checkEventDateHasNotPassedAndEventIsOpen(Event event){
         if(event.getEventStatus() != EventStatus.OPEN){
+            LOGGER.error("Event status is not open, can't add participants");
             throw new InvalidDateException("The event is not open");
         }
         if(LocalDate.now().isAfter(event.getDate().minusDays(1))){
+            LOGGER.error("Event date is passed, can't add participants");
             throw new InvalidDateException("The date to add participants is passed");
         }
     }
@@ -331,12 +397,14 @@ public class EventServiceImpl implements EventService {
         // check that they do not have an event created for that day
         for(Event event : user.getCreatedEvents()){
             if(event.getDate().equals(date) && event.getEventStatus() != EventStatus.CANCELLED){
+                LOGGER.error("User trying to join event on conflicting day");
                 throw new InvalidDateException("User has an event scheduled for this day");
             }
         }
         // check that they are not attending an event that day
         for(Event event : user.getAttending()){
             if(event.getDate().equals(date) && event.getEventStatus() != EventStatus.CANCELLED){
+                LOGGER.error("User trying to join event on conflicting day");
                 throw new InvalidDateException("User is already attending an event on this day");
             }
         }

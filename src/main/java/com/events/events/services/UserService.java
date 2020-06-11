@@ -116,10 +116,6 @@ public interface UserService extends UserDetailsService {
     @PreAuthorize("#username == authentication.principal.username")
     void unFollowUser(int userId, int friendId, String username);
 
-
-    List<Event> listEventsByUser(int userId);
-    List<Event> listEventsUserIsAttending(int userId);
-
     /**
      * This method takes the facebook token, requests the user's id and then stores the user's facebook id and token
      * @param token

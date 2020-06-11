@@ -276,26 +276,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
-    public List<Event> listEventsByUser(int userId) {
-        User user = verifyAndReturnUser(userId);
-        if(user.getCreatedEvents().isEmpty()){
-            throw new EmptyListException("There are no events for the user: "+ userId);
-        }
-        return user.getCreatedEvents();
-    }
-
-    @Override
-    @Transactional
-    public List<Event> listEventsUserIsAttending(int userId) {
-        User user = verifyAndReturnUser(userId);
-        if(user.getAttending().isEmpty()){
-            throw new EmptyListException("The user: "+userId+" is not attending any events");
-        }
-        return user.getAttending();
-    }
-
-    @Override
     public void setFacebookIdAndToken(String token, String username) {
         //check that the token received is valid and belongs to the user
         try {

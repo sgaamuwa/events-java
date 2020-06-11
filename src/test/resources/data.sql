@@ -26,22 +26,29 @@ INSERT INTO events (event_id, created_at, date, event_status, location, title, u
 INSERT INTO events (event_id, created_at, date, event_status, location, title, updated_at, user_id)
     VALUES(96, current_date, current_date + 5, 0, 'Santorini', 'Surfing', current_date, 94);
 INSERT INTO events (event_id, created_at, date, event_status, location, title, updated_at, user_id)
-    VALUES(97, current_date, current_date +6, 0, 'Capetown', 'Concert', current_date, 96);
+    VALUES(97, current_date, current_date + 6, 0, 'Capetown', 'Concert', current_date, 96);
+INSERT INTO events (event_id, created_at, date, event_status, location, title, updated_at, user_id)
+    VALUES(98, current_date, current_date + 10, 0, 'Oakland', 'Migration', current_date, 93);
 
-INSERT INTO user_event (user_id, event_id)
+INSERT INTO user_event_attending (user_id, event_id)
     VALUES(91,91);
-INSERT INTO user_event (user_id, event_id)
+INSERT INTO user_event_attending (user_id, event_id)
     VALUES(91,92);
-INSERT INTO user_event (user_id, event_id)
+INSERT INTO user_event_attending (user_id, event_id)
     VALUES(92,93);
-INSERT INTO user_event (user_id, event_id)
+INSERT INTO user_event_attending (user_id, event_id)
     VALUES(93,94);
-INSERT INTO user_event (user_id, event_id)
+INSERT INTO user_event_attending (user_id, event_id)
     VALUES(95,95);
-INSERT INTO user_event (user_id, event_id)
+INSERT INTO user_event_attending (user_id, event_id)
     VALUES(94,96);
-INSERT INTO user_event (user_id, event_id)
+INSERT INTO user_event_attending (user_id, event_id)
     VALUES(96,97);
+
+INSERT INTO user_event_invites (user_id, event_id)
+    VALUES(91, 93);
+INSERT INTO user_event_invites (user_id, event_id)
+    VALUES(91, 94);
 
 INSERT INTO friends (created_at, is_active, updated_at, owner_user_id, friend_user_id)
     VALUES(current_date, true, current_date, 91, 92);
@@ -53,3 +60,7 @@ INSERT INTO friends (created_at, is_active, updated_at, owner_user_id, friend_us
     VALUES(current_date, false, current_date, 91, 93);
 INSERT INTO friends (created_at, is_active, updated_at, owner_user_id, friend_user_id)
     VALUES(current_date, false, current_date, 92, 93);
+INSERT INTO friends (created_at, is_active, updated_at, owner_user_id, friend_user_id)
+    VALUES(current_date, true, current_date, 94, 93);
+INSERT INTO friends (created_at, is_active, updated_at, owner_user_id, friend_user_id)
+    VALUES(current_date, true, current_date, 95, 93);
