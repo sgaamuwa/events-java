@@ -49,7 +49,12 @@ public class Event extends RepresentationModel<Event> {
     private User creator;
 
     @ManyToMany(mappedBy = "attending")
+    @JsonIgnoreProperties({"createdEvents", "attending", "createdAt", "updatedAt", "enabled", "imageKey"})
     private Set<User> participants;
+
+    @ManyToMany(mappedBy = "invites")
+    @JsonIgnoreProperties({"createdEvents", "attending", "createdAt", "updatedAt", "enabled", "imageKey"})
+    private Set<User> invitees;
 
     @Column(nullable = false, updatable = false)
     @CreatedDate
@@ -60,6 +65,8 @@ public class Event extends RepresentationModel<Event> {
     private LocalDate updatedAt;
 
     private EventStatus eventStatus = EventStatus.OPEN;
+
+    private EventPermission eventPermission = EventPermission.PUBLIC;
 
     public Event(){
         this.participants = new HashSet<>();
@@ -164,6 +171,14 @@ public class Event extends RepresentationModel<Event> {
         this.participants = participants;
     }
 
+    public Set<User> getInvitees() {
+        return invitees;
+    }
+
+    public void setInvitees(Set<User> invitees) {
+        this.invitees = invitees;
+    }
+
     public LocalDate getCreatedAt(){
         return createdAt;
     }
@@ -188,6 +203,14 @@ public class Event extends RepresentationModel<Event> {
         this.eventStatus = eventStatus;
     }
 
+    public EventPermission getEventPermission() {
+        return eventPermission;
+    }
+
+    public void setEventPermission(EventPermission eventPermission) {
+        this.eventPermission = eventPermission;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if(obj == this){
@@ -201,5 +224,10 @@ public class Event extends RepresentationModel<Event> {
         }
 
         return Integer.compare(eventId, ((Event) obj).eventId) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(eventId);
     }
 }

@@ -16,6 +16,7 @@ import javax.validation.constraints.Size;
 import java.util.Collections;
 import java.util.List;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -62,10 +63,16 @@ public class User extends RepresentationModel<User> {
     private List<Event> createdEvents;
 
     @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "user_event",
+    @JoinTable(name = "user_event_attending",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "userId"),
             inverseJoinColumns = @JoinColumn(name = "event_id", referencedColumnName = "eventId"))
     private List<Event> attending;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "user_event_invites"
+            ,joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "userId")
+            ,inverseJoinColumns = @JoinColumn(name = "event_id", referencedColumnName = "eventId"))
+    private List<Event> invites;
 
     @OneToMany(mappedBy = "key.owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Friend> friends;
@@ -191,6 +198,15 @@ public class User extends RepresentationModel<User> {
     }
 
     @JsonIgnore
+    public List<Event> getInvites() {
+        return invites;
+    }
+
+    public void setInvites(List<Event> invites) {
+        this.invites = invites;
+    }
+
+    @JsonIgnore
     public Set<Friend> getFriends() {
         return friends;
     }
@@ -228,5 +244,10 @@ public class User extends RepresentationModel<User> {
         }
 
         return Integer.compare(userId, ((User) obj).userId) == 0 && username.equals(((User) obj).username);
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(userId, username);
     }
 }
