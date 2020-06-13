@@ -16,6 +16,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -63,7 +65,8 @@ public class UserEventIntegrationTests extends BaseIntegrationTest{
                         "\t\"location\" : \"Garden City\",\n" +
                         "\t\"description\" : \"Going to watch a sequel for a great movie\",\n" +
                         "\t\"link\" : \"https://www.google.com\",\n" +
-                        "\t\"date\" : \""+LocalDate.now().plusDays(10)+"\"\n" +
+                        "\t\"startTime\" : \""+ LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(10)+"\",\n" +
+                        "\t\"endTime\" : \""+ LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(10).plusHours(2)+"\"\n" +
                         "}")
                 .characterEncoding("utf-8"))
                 .andDo(print())

@@ -8,12 +8,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Integer>{
 
-    List<Event> findByDate(LocalDate date);
+    List<Event> findByStartTime(LocalDateTime date);
 
     List<Event> findByEventStatus(EventStatus eventStatus);
 
@@ -21,10 +22,10 @@ public interface EventRepository extends JpaRepository<Event, Integer>{
     List<Event> findAllEventsByFriends(@Param("friends") List<Integer> friends);
 
 
-    List<Event> findByDateGreaterThan(LocalDate date);
+    List<Event> findByStartTimeGreaterThan(LocalDateTime date);
 
-    List<Event> findByDateLessThan(LocalDate date);
+    List<Event> findByStartTimeLessThan(LocalDateTime date);
 
-    List<Event> findByDateBetween(LocalDate dateFrom, LocalDate dateTo);
+    List<Event> findByStartTimeBetween(LocalDateTime dateFrom, LocalDateTime dateTo);
 
 }

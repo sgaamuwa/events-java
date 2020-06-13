@@ -32,6 +32,13 @@ public interface UserService extends UserDetailsService {
     User getUserById(int id);
 
     /**
+     * This method returns a user given the username
+     * @param username
+     * @return
+     */
+    User findUserByUsername(String username);
+
+    /**
      * This method returns all the users in the system
      * @return
      */

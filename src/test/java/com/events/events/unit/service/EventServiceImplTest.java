@@ -18,7 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -27,8 +26,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.swing.text.html.Option;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -62,11 +61,11 @@ public class EventServiceImplTest {
     @MockBean
     private UserRepository userRepository;
 
-    private User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123", "sgaamuwa@email.com");
-    private User male = new User("michael", "male", "mmale", "pass123", "mmale@email.com");
-    private Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now().plusDays(3), samuel);
-    private Event beach = new Event("Beach", "Entebbe", LocalDate.now().plusDays(3), samuel);
-    private User bruce = new User("bruce", "bigirwenkya", "bbigirwenkya", "pass123", "bbigirwenkya@email.com");
+    final private User samuel = new User("samuel", "gaamuwa", "sgaamuwa", "pass123", "sgaamuwa@email.com");
+    final private User male = new User("michael", "male", "mmale", "pass123", "mmale@email.com");
+    final private Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3).plusHours(2), samuel);
+    final private Event beach = new Event("Beach", "Entebbe", LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3).plusHours(2), samuel);
+    final private User bruce = new User("bruce", "bigirwenkya", "bbigirwenkya", "pass123", "bbigirwenkya@email.com");
 
 
     @Before
@@ -96,9 +95,7 @@ public class EventServiceImplTest {
     @Test
     public void testAddingParticipantToEventWithWrongUser(){
 
-        Throwable exception = assertThrows(NotFoundException.class, () -> {
-            eventService.addSingleParticipantToEvent(1, 23);
-        });
+        Throwable exception = assertThrows(NotFoundException.class, () -> eventService.addSingleParticipantToEvent(1, 23));
         Assert.assertEquals("User with id: 23 not found", exception.getMessage());
         // ensure the save method is never called
         Mockito.verify(eventRepository, Mockito.never()).save(any(Event.class));
@@ -107,9 +104,7 @@ public class EventServiceImplTest {
     @Test
     public void testAddingParticipantToEventWithWrongEvent(){
 
-        Throwable exception = assertThrows(NotFoundException.class, () -> {
-            eventService.addSingleParticipantToEvent(12, 1);
-        });
+        Throwable exception = assertThrows(NotFoundException.class, () -> eventService.addSingleParticipantToEvent(12, 1));
         Assert.assertEquals("Event with id: 12 not found", exception.getMessage());
         // ensure the save method is never called
         Mockito.verify(eventRepository, Mockito.never()).save(any(Event.class));
@@ -129,7 +124,7 @@ public class EventServiceImplTest {
     @Test
     public void testSaveEventWithOldDate(){
         User user = Mockito.mock(User.class);
-        Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now().minusDays(1), user);
+        Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).minusDays(1), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).minusDays(1).plusHours(2), user);
 
         Throwable exception = assertThrows(InvalidDateException.class, () -> {
             eventService.saveEvent(cinemaMovie);
@@ -142,7 +137,7 @@ public class EventServiceImplTest {
     @Test
     public void testSaveEventWithCurrentDate(){
         User user = Mockito.mock(User.class);
-        Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now(), user);
+        Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDateTime.now().truncatedTo(ChronoUnit.HOURS), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusHours(2), user);
 
         Throwable exception = assertThrows(InvalidDateException.class, () -> {
             eventService.saveEvent(cinemaMovie);
@@ -155,7 +150,7 @@ public class EventServiceImplTest {
     @Test
     public void testSaveEventWithFutureDate(){
         User user = Mockito.mock(User.class);
-        Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDate.now().plusDays(2), user);
+        Event cinemaMovie = new Event("Movie", "Acacia Mall", LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(2), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(2).plusHours(2), user);
         ArgumentCaptor<Event> argument = ArgumentCaptor.forClass(Event.class);
         eventService.saveEvent(cinemaMovie);
         Mockito.verify(eventRepository, Mockito.atMost(1)).save(argument.capture());
@@ -164,7 +159,7 @@ public class EventServiceImplTest {
 
     @Test
     public void testDeleteEventWithValidId(){
-        Event event = new Event("Movie", "Acacia Mall", LocalDate.now().plusDays(2), male);
+        Event event = new Event("Movie", "Acacia Mall", LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(2), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(2).plusHours(2), male);
         Mockito.when(eventRepository.findById(new Integer(1))).thenReturn(Optional.of(event));
         eventService.deleteEvent(1, 1);
         Mockito.verify(eventRepository, Mockito.atMost(1)).delete(event);
@@ -182,7 +177,7 @@ public class EventServiceImplTest {
 
     @Test
     public void testDeleteEventWithInvalidUserID(){
-        Event event = new Event("Movie", "Acacia Mall", LocalDate.now().plusDays(2), bruce);
+        Event event = new Event("Movie", "Acacia Mall", LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(2), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(2).plusHours(2), bruce);
         Mockito.when(eventRepository.findById(new Integer(1))).thenReturn(Optional.of(event));
         Throwable exception = assertThrows(AuthorisationException.class, () -> {
             eventService.deleteEvent(1, 1);
@@ -242,7 +237,7 @@ public class EventServiceImplTest {
     @Test
     public void testCantAddUserToEventOnSameDayWithCreatedEvent(){
         male.setCreatedEvents(new ArrayList<>(Arrays.asList(cinemaMovie)));
-        Event newEvent = new Event("event", "Mityana", LocalDate.now().plusDays(3), samuel);
+        Event newEvent = new Event("event", "Mityana", LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3).plusHours(2), samuel);
         Mockito.when(eventRepository.findById(56)).thenReturn(Optional.of(newEvent));
         Throwable exception = assertThrows(InvalidDateException.class, () -> {
             eventService.addSingleParticipantToEvent(56,1);
@@ -253,7 +248,7 @@ public class EventServiceImplTest {
     @Test
     public void testCantAddUserToEventOnSameDayWithAttendingEvent(){
         male.setAttending(new ArrayList<>(Arrays.asList(cinemaMovie)));
-        Event newEvent = new Event("event", "Mityana", LocalDate.now().plusDays(3), samuel);
+        Event newEvent = new Event("event", "Mityana", LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3).plusHours(2), samuel);
         Mockito.when(eventRepository.findById(56)).thenReturn(Optional.of(newEvent));
         Throwable exception = assertThrows(InvalidDateException.class, () -> {
             eventService.addSingleParticipantToEvent(56,1);
@@ -263,7 +258,7 @@ public class EventServiceImplTest {
 
     @Test
     public void testCantAddUserToCancelledEvent(){
-        Event newEvent = new Event("event", "Mityana", LocalDate.now().plusDays(3), samuel);
+        Event newEvent = new Event("event", "Mityana", LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3).plusHours(2), samuel);
         newEvent.setEventStatus(EventStatus.CANCELLED);
         Mockito.when(eventRepository.findById(56)).thenReturn(Optional.of(newEvent));
         Throwable exception = assertThrows(InvalidDateException.class, () -> {
@@ -274,7 +269,7 @@ public class EventServiceImplTest {
 
     @Test
     public void testCantAddUserToClosedEvent(){
-        Event newEvent = new Event("event", "Mityana", LocalDate.now().plusDays(3), samuel);
+        Event newEvent = new Event("event", "Mityana", LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3).plusHours(2), samuel);
         newEvent.setEventStatus(EventStatus.CLOSED);
         Mockito.when(eventRepository.findById(56)).thenReturn(Optional.of(newEvent));
         Throwable exception = assertThrows(InvalidDateException.class, () -> {
@@ -288,8 +283,8 @@ public class EventServiceImplTest {
         samuel.setUserId(1);
         male.setUserId(2);
 
-        Event newEvent = new Event("event", "Mityana", LocalDate.now().plusDays(3), samuel);
-        Event newEvent2 = new Event("event", "Mityana", LocalDate.now().plusDays(3), male);
+        Event newEvent = new Event("event", "Mityana", LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3).plusHours(2), samuel);
+        Event newEvent2 = new Event("event", "Mityana", LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3).plusHours(2), male);
         User user1 = Mockito.mock(User.class);
 
         Friend friend1 = new Friend(user1, samuel);
@@ -315,8 +310,8 @@ public class EventServiceImplTest {
         samuel.setUserId(1);
         male.setUserId(2);
 
-        Event newEvent = new Event("event", "Mityana", LocalDate.now().plusDays(3), samuel);
-        Event newEvent2 = new Event("event", "Mityana", LocalDate.now().plusDays(3), male);
+        Event newEvent = new Event("event", "Mityana", LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3).plusHours(2), samuel);
+        Event newEvent2 = new Event("event", "Mityana", LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(3).plusHours(2), male);
         User user1 = Mockito.mock(User.class);
 
         Friend friend1 = new Friend(user1, samuel);

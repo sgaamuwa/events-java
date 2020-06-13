@@ -6,6 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventService {
@@ -129,10 +130,10 @@ public interface EventService {
      * @param date
      * @return List
      */
-    List<Event> getEventsByDate(LocalDate date);
-    List<Event> getEventsBetweenDates(LocalDate dateFrom, LocalDate dateTo);
-    List<Event> getEventsAfterDate(LocalDate date);
-    List<Event> getEventsBeforeDate(LocalDate date);
+    List<Event> getEventsByDate(LocalDateTime date);
+    List<Event> getEventsBetweenDates(LocalDateTime dateFrom, LocalDateTime dateTo);
+    List<Event> getEventsAfterDate(LocalDateTime date);
+    List<Event> getEventsBeforeDate(LocalDateTime date);
 
     /**
      * This is a method to cancel an event by the user

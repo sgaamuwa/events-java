@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -31,22 +31,22 @@ public class EventController {
     }
 
     @RequestMapping(method = RequestMethod.GET, params = "date")
-    public List<Event> getAllEventsByDate(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date){
+    public List<Event> getAllEventsByDate(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date){
         return eventService.getEventsByDate(date);
     }
 
     @RequestMapping(method = RequestMethod.GET, params = {"dateFrom", "dateTo"})
-    public List<Event> getAllEventsBetweenSpecificDates(@RequestParam("dateFrom") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom, @RequestParam("dateTo") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo){
+    public List<Event> getAllEventsBetweenSpecificDates(@RequestParam("dateFrom") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime dateFrom, @RequestParam("dateTo") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime dateTo){
         return eventService.getEventsBetweenDates(dateFrom, dateTo);
     }
 
     @RequestMapping(method = RequestMethod.GET, params = {"startingDate"})
-    public List<Event> getAllEventsAfterDate(@RequestParam("startingDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startingDate){
+    public List<Event> getAllEventsAfterDate(@RequestParam("startingDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime startingDate){
         return eventService.getEventsAfterDate(startingDate);
     }
 
     @RequestMapping(method = RequestMethod.GET, params = {"endingDate"})
-    public List<Event> getAllEventsBeforeDate(@RequestParam("endingDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endingDate){
+    public List<Event> getAllEventsBeforeDate(@RequestParam("endingDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime endingDate){
         return eventService.getEventsBeforeDate(endingDate);
     }
 

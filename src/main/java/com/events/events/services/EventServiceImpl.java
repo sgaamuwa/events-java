@@ -17,8 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,7 +42,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public Event saveEvent(Event event) {
         LOGGER.info("Saving event");
-        if(event.getDate().isBefore(LocalDate.now().plusDays(1))){
+        if(event.getStartTime().isBefore(LocalDateTime.now().plusDays(1))){
             LOGGER.info("Saving event failed");
             LOGGER.error("Event was not in the acceptable range ");
             throw new InvalidDateException("Event date must be at least a day from now");
@@ -55,7 +55,7 @@ public class EventServiceImpl implements EventService {
     public Event saveEvent(Event event, int userId) {
         User user = verifyAndReturnUser(userId);
         event.setCreator(user);
-        checkUserDoesNotHaveEventOnSameDay(user, event.getDate());
+        checkUserDoesNotHaveEventAtTheSameTime(user, event.getStartTime());
         return saveEvent(event);
     }
 
@@ -228,7 +228,7 @@ public class EventServiceImpl implements EventService {
         // check that the event date has not passed
         checkEventDateHasNotPassedAndEventIsOpen(event);
         for(User user : users){
-            checkUserDoesNotHaveEventOnSameDay(user, event.getDate());
+            checkUserDoesNotHaveEventAtTheSameTime(user, event.getStartTime());
         }
 
         Set<User> newParticipantsList = event.getParticipants();
@@ -247,7 +247,7 @@ public class EventServiceImpl implements EventService {
         Event event = verifyAndReturnEvent(eventId);
         // check that the event date has not passed
         checkEventDateHasNotPassedAndEventIsOpen(event);
-        checkUserDoesNotHaveEventOnSameDay(user, event.getDate());
+        checkUserDoesNotHaveEventAtTheSameTime(user, event.getStartTime());
         // check that the user does not exist in the set
         Set<User> participants = event.getParticipants();
         if(!participants.contains(user)){
@@ -289,10 +289,10 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public List<Event> getEventsByDate(LocalDate date) {
+    public List<Event> getEventsByDate(LocalDateTime date) {
         LOGGER.info(String.format("Get events by date: %s started", date.toString()));
 
-        List<Event> events = eventRepository.findByDate(date);
+        List<Event> events = eventRepository.findByStartTime(date);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events for the date: "+ date);
         }
@@ -303,9 +303,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public List<Event> getEventsBetweenDates(LocalDate dateFrom, LocalDate dateTo) {
+    public List<Event> getEventsBetweenDates(LocalDateTime dateFrom, LocalDateTime dateTo) {
         LOGGER.info(String.format("Get events between date: %s and date: %s started", dateFrom.toString(), dateTo.toString()));
-        List<Event> events = eventRepository.findByDateBetween(dateFrom, dateTo);
+        List<Event> events = eventRepository.findByStartTimeBetween(dateFrom, dateTo);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events for between the dates: "+ dateFrom + " and "+ dateTo);
         }
@@ -315,9 +315,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public List<Event> getEventsAfterDate(LocalDate date) {
+    public List<Event> getEventsAfterDate(LocalDateTime date) {
         LOGGER.info(String.format("Get events after date: %s started", date.toString()));
-        List<Event> events = eventRepository.findByDateGreaterThan(date);
+        List<Event> events = eventRepository.findByStartTimeGreaterThan(date);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events after the date: "+ date);
         }
@@ -327,9 +327,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public List<Event> getEventsBeforeDate(LocalDate date) {
+    public List<Event> getEventsBeforeDate(LocalDateTime date) {
         LOGGER.info(String.format("Get events before date: %s started", date.toString()));
-        List<Event> events = eventRepository.findByDateLessThan(date);
+        List<Event> events = eventRepository.findByStartTimeLessThan(date);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events before the date: "+ date);
         }
@@ -395,23 +395,23 @@ public class EventServiceImpl implements EventService {
             LOGGER.error("Event status is not open, can't add participants");
             throw new InvalidDateException("The event is not open");
         }
-        if(LocalDate.now().isAfter(event.getDate().minusDays(1))){
+        if(LocalDateTime.now().isAfter(event.getStartTime().minusDays(1))){
             LOGGER.error("Event date is passed, can't add participants");
             throw new InvalidDateException("The date to add participants is passed");
         }
     }
 
-    private void checkUserDoesNotHaveEventOnSameDay(User user, LocalDate date){
+    private void checkUserDoesNotHaveEventAtTheSameTime(User user, LocalDateTime date){
         // check that they do not have an event created for that day
         for(Event event : user.getCreatedEvents()){
-            if(event.getDate().equals(date) && event.getEventStatus() != EventStatus.CANCELLED){
+            if(event.getStartTime().equals(date) && event.getEventStatus() != EventStatus.CANCELLED){
                 LOGGER.error("User trying to join event on conflicting day");
                 throw new InvalidDateException("User has an event scheduled for this day");
             }
         }
         // check that they are not attending an event that day
         for(Event event : user.getAttending()){
-            if(event.getDate().equals(date) && event.getEventStatus() != EventStatus.CANCELLED){
+            if(event.getStartTime().equals(date) && event.getEventStatus() != EventStatus.CANCELLED){
                 LOGGER.error("User trying to join event on conflicting day");
                 throw new InvalidDateException("User is already attending an event on this day");
             }

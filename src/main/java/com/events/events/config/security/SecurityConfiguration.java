@@ -32,15 +32,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        JWTAuthenticationFilter jwtAuthenticationFilter = new JWTAuthenticationFilter(authenticationManager(), userService);
+        jwtAuthenticationFilter.setFilterProcessesUrl("/v1/account/login");
         http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/login").permitAll()
+                .antMatchers("/v1/account/login").permitAll()
                 .antMatchers("/v1/account/register").permitAll()
                 .antMatchers("/v1/account/confirmAccount").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
-                .addFilter(new JWTAuthenticationFilter(authenticationManager()))
+                .addFilter(jwtAuthenticationFilter)
                 .addFilter(new JWTAuthorizationFilter(authenticationManager()));
 
     }

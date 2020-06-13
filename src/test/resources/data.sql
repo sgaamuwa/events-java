@@ -13,22 +13,22 @@ INSERT INTO users (user_id, created_at, email, enabled, first_name, last_name, u
 INSERT INTO users (user_id, created_at, email, enabled, first_name, last_name, updated_at, username, password)
     VALUES(96, current_date, 'pnakiyemba@gmail.com', true, 'Peace', 'Nakiyemba', current_date, 'pnakiyemba', 'pass123' );
 
-INSERT INTO events (event_id, created_at, date, event_status, location, title, updated_at, user_id)
-    VALUES(91, current_date, current_date + 2, 0, 'Zanzibar', 'Snockling', current_date, 91);
-INSERT INTO events (event_id, created_at, date, event_status, location, title, updated_at, user_id)
-    VALUES(92, current_date, current_date + 3, 0, 'Jinja', 'Bungee Jumping', current_date, 91);
-INSERT INTO events (event_id, created_at, date, event_status, location, title, updated_at, user_id)
-    VALUES(93, current_date, current_date + 1, 0, 'Mukono', 'Night Dancing', current_date, 92);
-INSERT INTO events (event_id, created_at, date, event_status, location, title, updated_at, user_id)
-    VALUES(94, current_date, current_date + 4, 0, 'Diani', 'Sun Bathing', current_date, 93);
-INSERT INTO events (event_id, created_at, date, event_status, location, title, updated_at, user_id)
-    VALUES(95, current_date, current_date + 4, 0, 'Bali', 'Jungle Walk', current_date, 95);
-INSERT INTO events (event_id, created_at, date, event_status, location, title, updated_at, user_id)
-    VALUES(96, current_date, current_date + 5, 0, 'Santorini', 'Surfing', current_date, 94);
-INSERT INTO events (event_id, created_at, date, event_status, location, title, updated_at, user_id)
-    VALUES(97, current_date, current_date + 6, 0, 'Capetown', 'Concert', current_date, 96);
-INSERT INTO events (event_id, created_at, date, event_status, location, title, updated_at, user_id)
-    VALUES(98, current_date, current_date + 10, 0, 'Oakland', 'Migration', current_date, 93);
+INSERT INTO events (event_id, created_at, start_time, end_time, event_status, location, title, updated_at, user_id)
+    VALUES(91, current_date, date_trunc('hour', NOW() + interval '1 day'), date_trunc('hour', NOW() + interval '1 day 2 hours'), 0, 'Zanzibar', 'Snockling', current_date, 91);
+INSERT INTO events (event_id, created_at, start_time, end_time, event_status, location, title, updated_at, user_id)
+    VALUES(92, current_date, (NOW() + interval '3 day'), (NOW() + interval '3 day 2 hours'), 0, 'Jinja', 'Bungee Jumping', current_date, 91);
+INSERT INTO events (event_id, created_at, start_time, end_time, event_status, location, title, updated_at, user_id)
+    VALUES(93, current_date, (NOW() + interval '1 day'), (NOW() + interval '1 day 2 hours'), 0, 'Mukono', 'Night Dancing', current_date, 92);
+INSERT INTO events (event_id, created_at, start_time, end_time, event_status, location, title, updated_at, user_id)
+    VALUES(94, current_date, (NOW() + interval '4 day'), (NOW() + interval '4 day 2 hours'), 0, 'Diani', 'Sun Bathing', current_date, 93);
+INSERT INTO events (event_id, created_at, start_time, end_time, event_status, location, title, updated_at, user_id)
+    VALUES(95, current_date, (NOW() + interval '4 day'), (NOW() + interval '4 day 2 hours'), 0, 'Bali', 'Jungle Walk', current_date, 95);
+INSERT INTO events (event_id, created_at, start_time, end_time, event_status, location, title, updated_at, user_id)
+    VALUES(96, current_date, (NOW() + interval '5 day'), (NOW() + interval '5 day 2 hours'), 0, 'Santorini', 'Surfing', current_date, 94);
+INSERT INTO events (event_id, created_at, start_time, end_time, event_status, location, title, updated_at, user_id)
+    VALUES(97, current_date, (NOW() + interval '6 day'), (NOW() + interval '6day 2 hours'), 0, 'Capetown', 'Concert', current_date, 96);
+INSERT INTO events (event_id, created_at, start_time, end_time, event_status, location, title, updated_at, user_id)
+    VALUES(98, current_date, (NOW() + interval '10 day'), (NOW() + interval '10 day 2 hours'), 0, 'Oakland', 'Migration', current_date, 93);
 
 INSERT INTO user_event_attending (user_id, event_id)
     VALUES(91,91);
