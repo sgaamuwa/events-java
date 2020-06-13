@@ -90,6 +90,13 @@ public interface UserService extends UserDetailsService {
     List<User> getAllFollowers(int userId);
 
     /**
+     * This method returns users that have the search term in their firstName lastName or username
+     * @param searchTerm
+     * @return
+     */
+    List<User> searchUsers(String searchTerm);
+
+    /**
      * This method that accepts a follow request from the user with the given id
      * @param userId
      * @param followerId

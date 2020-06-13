@@ -208,6 +208,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<User> searchUsers(String searchTerm) {
+        LOGGER.info("Searching for user: "+ searchTerm);
+        List<User> users =  userRepository.findBySearchTerm(searchTerm);
+        if(users.isEmpty()){
+            LOGGER.info("Searching for user: "+ searchTerm + " completed");
+            throw new EmptyListException("There are no users who fit the search term: "+ searchTerm);
+        }
+        LOGGER.info("Searching for user: "+ searchTerm + " completed");
+        return users;
+    }
+
+    @Override
     @Transactional
     public void acceptFollowRequest(int userId, int followerId, String username) {
         // check that the person cancelling the request exists

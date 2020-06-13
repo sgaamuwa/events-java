@@ -1,6 +1,5 @@
 package com.events.events.integration.user;
 
-import com.events.events.models.User;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.security.Principal;
-import java.time.LocalDate;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -109,6 +107,31 @@ public class UserIntegrationTests extends BaseIntegrationTest{
                 .andExpect(jsonPath("$[0].userId", is(92)))
                 .andExpect(jsonPath("$[1].userId", is(93)))
                 .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    @Test
+    @WithMockUser
+    public void testCanSearchForUserGivenParameters() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders
+                .get("/v1/users/search?q=aamu")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].userId", is(91)))
+                .andExpect(jsonPath("$[1].userId", is(94)))
+                .andExpect(jsonPath("$", hasSize(3)));
+    }
+
+    @Test
+    @WithMockUser
+    public void testReturnsNoContentIfNoUserWithSearchParameters() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders
+                .get("/v1/users/search?q=warrit")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNoContent())
+                .andExpect(jsonPath("$.status", is("NO_CONTENT")))
+                .andExpect(jsonPath("$.message", is("There are no users who fit the search term: warrit")));
     }
 
 

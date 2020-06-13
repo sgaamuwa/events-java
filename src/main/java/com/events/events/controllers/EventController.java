@@ -50,12 +50,6 @@ public class EventController {
         return eventService.getEventsBeforeDate(endingDate);
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public Event getEventById(@PathVariable("id") int id){
-        return eventService.getEventById(id);
-    }
-
-
     @RequestMapping(value = "/{id}/participants/{userId}", method = RequestMethod.POST)
     public Event addParticipantToEvent(@PathVariable("id") int id, @PathVariable("userId") int userId){
         return eventService.addSingleParticipantToEvent(id, userId);

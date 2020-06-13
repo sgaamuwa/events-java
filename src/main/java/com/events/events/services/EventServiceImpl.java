@@ -119,9 +119,17 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public Event getEventById(int eventId) {
+    public Event getEventById(int eventId, int userId) {
         LOGGER.info("Get Event Id: "+eventId+" started");
-        return verifyAndReturnEvent(eventId);
+        Event event = verifyAndReturnEvent(eventId);
+        User user = verifyAndReturnUser(userId);
+        if(!event.getCreator().equals(user)){
+            LOGGER.info("Get Event Id: "+eventId+" failed");
+            LOGGER.error("User not associated with the corresponding events");
+            throw new NotFoundException("User with id: "+userId+ "doesn't have an event with id:"+event);
+        }
+        LOGGER.info("Get Event Id: "+eventId+" completed");
+        return event;
     }
 
     @Override

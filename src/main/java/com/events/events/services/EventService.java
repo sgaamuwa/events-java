@@ -57,9 +57,10 @@ public interface EventService {
     /**
      * This is a method to return one event based on the id
      * @param eventId
+     * @param userId
      * @return Event
      */
-    Event getEventById(int eventId);
+    Event getEventById(int eventId, int userId);
 
     /**
      * This is a method to return all the events
