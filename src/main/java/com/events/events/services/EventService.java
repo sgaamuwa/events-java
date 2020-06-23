@@ -1,11 +1,12 @@
 package com.events.events.services;
 
 import com.events.events.models.Event;
-import com.events.events.models.User;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventService {
@@ -57,9 +58,10 @@ public interface EventService {
     /**
      * This is a method to return one event based on the id
      * @param eventId
+     * @param userId
      * @return Event
      */
-    Event getEventById(int eventId);
+    Event getEventById(int eventId, int userId);
 
     /**
      * This is a method to return all the events
@@ -74,6 +76,29 @@ public interface EventService {
      * @return
      */
     List<Event> getAllEventsForUser(String username);
+
+    /**
+     * This method returns all events that are created by the user
+     * @param userId
+     * @return
+     */
+    List<Event> getAllEventsCreatedByUser(int userId);
+
+    /**
+     * This method returns all the events that a user has rsvp to attend
+     * @param userId
+     * @return
+     */
+    @PreAuthorize("#username == authentication.principal.username")
+    List<Event> getAllEventsUserIsAttending(int userId, String username);
+
+    /**
+     * This method returns all the events that a user has been invited to
+     * @param userId
+     * @return
+     */
+    @PreAuthorize("#username == authentication.principal.username")
+    List<Event> getAllEventsUserIsInvitedTo(int userId, String username);
 
     /**
      * This is a method that adds a number of users to an event
@@ -92,21 +117,23 @@ public interface EventService {
     Event addSingleParticipantToEvent(int eventId, int userId);
 
     /**
+     * This method adds invitees to an event
+     * @param userId
+     * @param eventId
+     * @param invitees
+     * @return
+     */
+    Event addInviteesToEvent(int userId, int eventId, int[] invitees);
+
+    /**
      * This is a method that returns all events happening on a given date
      * @param date
      * @return List
      */
-    List<Event> getEventsByDate(LocalDate date);
-    List<Event> getEventsBetweenDates(LocalDate dateFrom, LocalDate dateTo);
-    List<Event> getEventsAfterDate(LocalDate date);
-    List<Event> getEventsBeforeDate(LocalDate date);
-
-    /**
-     * This is a method to return all the events of a user given their id
-     * @param userId
-     * @return
-     */
-    List<Event> getEventsByUser(int userId);
+    List<Event> getEventsByDate(LocalDateTime date);
+    List<Event> getEventsBetweenDates(LocalDateTime dateFrom, LocalDateTime dateTo);
+    List<Event> getEventsAfterDate(LocalDateTime date);
+    List<Event> getEventsBeforeDate(LocalDateTime date);
 
     /**
      * This is a method to cancel an event by the user

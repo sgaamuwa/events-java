@@ -16,6 +16,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -63,7 +65,8 @@ public class UserEventIntegrationTests extends BaseIntegrationTest{
                         "\t\"location\" : \"Garden City\",\n" +
                         "\t\"description\" : \"Going to watch a sequel for a great movie\",\n" +
                         "\t\"link\" : \"https://www.google.com\",\n" +
-                        "\t\"date\" : \""+LocalDate.now().plusDays(10)+"\"\n" +
+                        "\t\"startTime\" : \""+ LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(10)+"\",\n" +
+                        "\t\"endTime\" : \""+ LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(10).plusHours(2)+"\"\n" +
                         "}")
                 .characterEncoding("utf-8"))
                 .andDo(print())
@@ -88,5 +91,64 @@ public class UserEventIntegrationTests extends BaseIntegrationTest{
                 .characterEncoding("utf-8"))
                 .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "samuelgaamuwa")
+    public void testCanGetEventsUserIsInvitedTo() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders
+                .get("/v1/users/91/events/invites")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].eventId", is(93)))
+                .andExpect(jsonPath("$[1].eventId", is(94)));
+    }
+
+    @Test
+    @WithMockUser(username = "samuelgaamuwa")
+    public void testCanGetEventsUserIsAttending() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders
+                .get("/v1/users/91/events/attending")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].eventId", is(91)))
+                .andExpect(jsonPath("$[1].eventId", is(92)));
+    }
+
+    @Test
+    @WithMockUser(username = "snazziwa")
+    public void testCanAddInviteesToEvent() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/v1/users/93/events/98/invites")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\n" +
+                        "\t\"invitees\": [94, 95, 91, 92, 96]\n" +
+                        "}")
+                .characterEncoding("utf-8"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.invitees", hasSize(2)))
+                .andExpect(jsonPath("$.invitees[0].userId", is(94)))
+                .andExpect(jsonPath("$.invitees[1].userId", is(95)));
+    }
+
+    @Test
+    @WithMockUser(username = "samuelgaamuwa")
+    public void testCanGetParticipantsForAnEvent() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders
+                .get("/v1/users/91/events/attending")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].eventId", is(91)))
+                .andExpect(jsonPath("$[1].eventId", is(92)));
     }
 }

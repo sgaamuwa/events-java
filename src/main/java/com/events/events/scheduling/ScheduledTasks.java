@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -19,7 +20,7 @@ public class ScheduledTasks {
     @Scheduled(cron = "0 0 0 * * ?")
     public void scheduleClosingEventsDayBefore(){
         // close every event that is 24 hours away
-        List<Event> events = eventRepository.findByDate(LocalDate.now().plusDays(1));
+        List<Event> events = eventRepository.findByStartTime(LocalDateTime.now().plusDays(1));
         for (Event event : events){
             event.setEventStatus(EventStatus.CLOSED);
         }

@@ -14,6 +14,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     Optional<User> findByUsername(String username);
 
+    @Query(value = "SELECT * FROM users u WHERE u.first_name LIKE %:parameter% OR u.last_name LIKE %:parameter% OR u.username LIKE %:parameter%", nativeQuery=true)
+    List<User> findBySearchTerm(@Param("parameter") String parameter);
+
     @Query(value = "SELECT id FROM users u WHERE u.facebook_id IN (:facebookIds)", nativeQuery = true)
     List<String> getUserIdsForUsersWithFacebookIds(@Param("facebookIds") List<String> facebookIds);
 

@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.List;
 import java.util.Optional;
 
 @RunWith(SpringRunner.class)
@@ -36,6 +37,12 @@ public class UserRepositoryTest {
         Optional<User> returnedUser = userRepository.findByUsername("sgaamuwa");
 
         Assert.assertEquals(samuel, returnedUser.get());
+    }
+
+    @Test
+    public void testFindBySearchTerm(){
+        List<User> users = userRepository.findBySearchTerm("aamu");
+        Assert.assertEquals(3, users.size());
     }
 
 }

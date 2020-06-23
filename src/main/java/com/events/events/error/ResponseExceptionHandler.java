@@ -63,8 +63,4 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         return this.handleExceptionInternal(ex, customErrorMessage, headers, status, request);
     }
 
-
-
-
-
 }

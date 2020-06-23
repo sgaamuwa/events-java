@@ -10,9 +10,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.hateoas.RepresentationModel;;
 
 import javax.persistence.*;
+import javax.validation.constraints.Future;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Past;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -39,7 +43,9 @@ public class Event extends RepresentationModel<Event> {
     @JsonSerialize(using = CustomURLSerializer.class)
     private String imageKey;
 
-    private LocalDate date;
+    private LocalDateTime startTime;
+
+    private LocalDateTime endTime;
 
     private Currency cost;
 
@@ -49,7 +55,12 @@ public class Event extends RepresentationModel<Event> {
     private User creator;
 
     @ManyToMany(mappedBy = "attending")
+    @JsonIgnoreProperties({"createdEvents", "attending", "createdAt", "updatedAt", "enabled", "imageKey"})
     private Set<User> participants;
+
+    @ManyToMany(mappedBy = "invites")
+    @JsonIgnoreProperties({"createdEvents", "attending", "createdAt", "updatedAt", "enabled", "imageKey"})
+    private Set<User> invitees;
 
     @Column(nullable = false, updatable = false)
     @CreatedDate
@@ -61,33 +72,37 @@ public class Event extends RepresentationModel<Event> {
 
     private EventStatus eventStatus = EventStatus.OPEN;
 
+    private EventPermission eventPermission = EventPermission.PUBLIC;
+
     public Event(){
         this.participants = new HashSet<>();
     }
 
-    public Event(String title, String location, LocalDate date, User creator) {
+    public Event(String title, String location, LocalDateTime startTime, LocalDateTime endTime, User creator) {
         this();
         this.title = title;
         this.location = location;
-        this.date = date;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.creator = creator;
     }
 
-    public Event(String title, String location, String description, LocalDate date, User creator) {
-        this(title, location, date, creator);
+    public Event(String title, String location, String description, LocalDateTime startTime, LocalDateTime endTime, User creator) {
+        this(title, location, startTime, endTime, creator);
         this.description = description;
     }
 
-    public Event(String title, String location, String description, String link, LocalDate date, User creator) throws MalformedURLException {
-        this(title, location, description, date, creator);
+    public Event(String title, String location, String description, String link, LocalDateTime startTime, LocalDateTime endTime, User creator) throws MalformedURLException {
+        this(title, location, description, startTime, endTime, creator);
         this.link = new URL(link);
     }
 
-    public Event(String title, String location, URL link, LocalDate date, User creator, Set<User> participants) {
+    public Event(String title, String location, URL link, LocalDateTime startTime, LocalDateTime endTime, User creator, Set<User> participants) {
         this.title = title;
         this.location = location;
         this.link = link;
-        this.date = date;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.creator = creator;
         this.participants = participants;
     }
@@ -140,8 +155,20 @@ public class Event extends RepresentationModel<Event> {
         this.link = link;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 
     public User getCreator() {
@@ -152,16 +179,20 @@ public class Event extends RepresentationModel<Event> {
         this.creator = creator;
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
     public Set<User> getParticipants() {
         return participants;
     }
 
     public void setParticipants(Set<User> participants) {
         this.participants = participants;
+    }
+
+    public Set<User> getInvitees() {
+        return invitees;
+    }
+
+    public void setInvitees(Set<User> invitees) {
+        this.invitees = invitees;
     }
 
     public LocalDate getCreatedAt(){
@@ -188,6 +219,14 @@ public class Event extends RepresentationModel<Event> {
         this.eventStatus = eventStatus;
     }
 
+    public EventPermission getEventPermission() {
+        return eventPermission;
+    }
+
+    public void setEventPermission(EventPermission eventPermission) {
+        this.eventPermission = eventPermission;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if(obj == this){
@@ -201,5 +240,10 @@ public class Event extends RepresentationModel<Event> {
         }
 
         return Integer.compare(eventId, ((Event) obj).eventId) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(eventId);
     }
 }

@@ -83,6 +83,11 @@ public class UserController {
         return new ResponseEntity<>("You have stopped follow user with userId: "+id, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/search", params = {"q"}, method = RequestMethod.GET)
+    public List<User> searchUsers(@RequestParam("q") String searchTerm){
+        return userService.searchUsers(searchTerm);
+    }
+
     @RequestMapping(value = "/facebook/setToken", method = RequestMethod.POST)
     public ResponseEntity<String> setFacebookAccessToken(@RequestBody Map<String, String> payload, Principal principal){
         userService.setFacebookIdAndToken(payload.get("token"), principal.getName());

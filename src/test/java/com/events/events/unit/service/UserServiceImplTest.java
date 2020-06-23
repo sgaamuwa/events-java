@@ -1,9 +1,6 @@
 package com.events.events.unit.service;
 
-import com.events.events.error.AuthenticationException;
-import com.events.events.error.DuplicateCreationException;
-import com.events.events.error.IllegalFriendActionException;
-import com.events.events.error.NotFoundException;
+import com.events.events.error.*;
 import com.events.events.models.Friend;
 import com.events.events.models.User;
 import com.events.events.repository.ConfirmationTokenRepository;
@@ -28,10 +25,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -324,5 +318,23 @@ public class UserServiceImplTest {
         User user = userService.uploadUserImage(1, multipartFile);
         Assert.assertEquals(user.getImageKey(), "myFileNameInS3");
     }
+
+    @Test
+    public void testCanSearchForUser(){
+        Mockito.when(userRepository.findBySearchTerm("aamu")).thenReturn(Arrays.asList(samuel, joy));
+        List<User> users = userService.searchUsers("aamu");
+        Assert.assertEquals(2, users.size());
+        Assert.assertTrue(users.containsAll(Arrays.asList(samuel, joy)));
+    }
+
+    @Test
+    public void testThrowsExceptionIfNoUsersWithSearchTerm(){
+        Mockito.when(userRepository.findBySearchTerm("aamu")).thenReturn(Collections.emptyList());
+        Throwable exception = assertThrows(EmptyListException.class, () -> {
+            userService.searchUsers("aamu");
+        });
+        Assert.assertEquals("There are no users who fit the search term: aamu", exception.getMessage());
+    }
+
 
 }

@@ -105,6 +105,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User findUserByUsername(String username) {
+        return userRepository.findByUsername(username).get();
+    }
+
+    @Override
     @Transactional
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -208,6 +213,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<User> searchUsers(String searchTerm) {
+        LOGGER.info("Searching for user: "+ searchTerm);
+        List<User> users =  userRepository.findBySearchTerm(searchTerm);
+        if(users.isEmpty()){
+            LOGGER.info("Searching for user: "+ searchTerm + " completed");
+            throw new EmptyListException("There are no users who fit the search term: "+ searchTerm);
+        }
+        LOGGER.info("Searching for user: "+ searchTerm + " completed");
+        return users;
+    }
+
+    @Override
     @Transactional
     public void acceptFollowRequest(int userId, int followerId, String username) {
         // check that the person cancelling the request exists
@@ -273,26 +290,6 @@ public class UserServiceImpl implements UserService {
 
         // delete the friend relationship from the database, whether friends or not
         friendRepository.delete(friendship.get());
-    }
-
-    @Override
-    @Transactional
-    public List<Event> listEventsByUser(int userId) {
-        User user = verifyAndReturnUser(userId);
-        if(user.getCreatedEvents().isEmpty()){
-            throw new EmptyListException("There are no events for the user: "+ userId);
-        }
-        return user.getCreatedEvents();
-    }
-
-    @Override
-    @Transactional
-    public List<Event> listEventsUserIsAttending(int userId) {
-        User user = verifyAndReturnUser(userId);
-        if(user.getAttending().isEmpty()){
-            throw new EmptyListException("The user: "+userId+" is not attending any events");
-        }
-        return user.getAttending();
     }
 
     @Override

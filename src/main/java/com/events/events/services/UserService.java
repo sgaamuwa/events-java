@@ -32,6 +32,13 @@ public interface UserService extends UserDetailsService {
     User getUserById(int id);
 
     /**
+     * This method returns a user given the username
+     * @param username
+     * @return
+     */
+    User findUserByUsername(String username);
+
+    /**
      * This method returns all the users in the system
      * @return
      */
@@ -90,6 +97,13 @@ public interface UserService extends UserDetailsService {
     List<User> getAllFollowers(int userId);
 
     /**
+     * This method returns users that have the search term in their firstName lastName or username
+     * @param searchTerm
+     * @return
+     */
+    List<User> searchUsers(String searchTerm);
+
+    /**
      * This method that accepts a follow request from the user with the given id
      * @param userId
      * @param followerId
@@ -115,10 +129,6 @@ public interface UserService extends UserDetailsService {
      */
     @PreAuthorize("#username == authentication.principal.username")
     void unFollowUser(int userId, int friendId, String username);
-
-
-    List<Event> listEventsByUser(int userId);
-    List<Event> listEventsUserIsAttending(int userId);
 
     /**
      * This method takes the facebook token, requests the user's id and then stores the user's facebook id and token

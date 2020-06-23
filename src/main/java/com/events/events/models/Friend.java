@@ -8,6 +8,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -103,6 +104,11 @@ public class Friend {
             }
             return this.owner.equals(((Key) obj).owner) && this.friend.equals(((Key) obj).friend);
         }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.owner, this.friend);
+        }
     }
 
     @Override
@@ -117,5 +123,10 @@ public class Friend {
             return false;
         }
         return key.owner.equals(((Friend) obj).key.owner) && key.friend.equals(((Friend) obj).key.friend);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(key.owner, key.friend);
     }
 }
