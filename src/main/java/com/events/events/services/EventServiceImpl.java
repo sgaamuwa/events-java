@@ -156,6 +156,8 @@ public class EventServiceImpl implements EventService {
         Set<Friend> friends = user.get().getFriends();
         //get the user ids for all the friends
         List<Integer> friendsUserIds = friends.stream().filter(friend -> friend.isActive()).map(friend -> friend.getFriend().getUserId()).collect(Collectors.toList());
+        // user should also get the events that they have created
+        friendsUserIds.add(user.get().getUserId());
         List<Event> events = eventRepository.findAllEventsByFriends(friendsUserIds);
         //return events that are public or private ones where they have been invited
         events = events.stream().filter(event -> event.getEventPermission().equals(EventPermission.PUBLIC) || event.getInvitees().contains(user)).collect(Collectors.toList());
