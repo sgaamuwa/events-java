@@ -324,12 +324,12 @@ public class EventServiceImplTest {
         set.add(friend1);
         set.add(friend2);
 
-        Mockito.when(eventRepository.findAllEventsByFriends(Arrays.asList(new Integer(1)))).thenReturn(Arrays.asList(newEvent));
+        Mockito.when(eventRepository.findAllEventsByFriends(Arrays.asList(new Integer(1), new Integer(0)))).thenReturn(Arrays.asList(newEvent));
         Mockito.when(userRepository.findByUsername("username")).thenReturn(Optional.of(user1));
 
         Mockito.when(user1.getFriends()).thenReturn(set);
 
         Assert.assertEquals(eventService.getAllEventsForUser("username").size(), 1);
-        Mockito.verify(eventRepository).findAllEventsByFriends(Arrays.asList(new Integer(1)));
+        Mockito.verify(eventRepository).findAllEventsByFriends(Arrays.asList(new Integer(1), new Integer(0)));
     }
 }
