@@ -66,7 +66,7 @@ public class EventRepositoryTest {
         //save an event
         entityManager.persist(cinemaMovie);
         // retrieve it by date
-        List<Event> events = eventRepository.findByStartTime(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
+        List<Event> events = eventRepository.findByStartTimeOrderByStartTimeAsc(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
 
         Assert.assertEquals(events.size(), 1);
         Assert.assertEquals(events.get(0).getTitle(), "Movie");
@@ -82,8 +82,8 @@ public class EventRepositoryTest {
         entityManager.persist(jumping);
         entityManager.persist(cinemaMovie);
 
-        Assert.assertEquals(eventRepository.findByStartTimeBetween(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(2)).size(), 4);
-        Assert.assertEquals(eventRepository.findByStartTimeBetween(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).minusDays(1), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(1)).size(), 2);
+        Assert.assertEquals(eventRepository.findByStartTimeBetweenOrderByStartTimeAsc(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(2)).size(), 4);
+        Assert.assertEquals(eventRepository.findByStartTimeBetweenOrderByStartTimeAsc(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).minusDays(1), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(1)).size(), 2);
     }
 
     @Test
@@ -96,8 +96,8 @@ public class EventRepositoryTest {
         entityManager.persist(jumping);
         entityManager.persist(cinemaMovie);
 
-        Assert.assertEquals(eventRepository.findByStartTimeGreaterThan(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(1)).size(), 9);
-        Assert.assertEquals(eventRepository.findByStartTimeGreaterThan(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).minusDays(1)).size(), 11);
+        Assert.assertEquals(eventRepository.findByStartTimeGreaterThanOrderByStartTimeAsc(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(1)).size(), 9);
+        Assert.assertEquals(eventRepository.findByStartTimeGreaterThanOrderByStartTimeAsc(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).minusDays(1)).size(), 11);
     }
 
     @Test
@@ -110,9 +110,9 @@ public class EventRepositoryTest {
         entityManager.persist(jumping);
         entityManager.persist(cinemaMovie);
 
-        Assert.assertEquals(eventRepository.findByStartTimeLessThan(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(1)).size(), 1);
-        Assert.assertEquals(eventRepository.findByStartTimeLessThan(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).minusDays(1)).size(), 0);
-        Assert.assertEquals(eventRepository.findByStartTimeLessThan(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(4)).size(), 6);
+        Assert.assertEquals(eventRepository.findByStartTimeLessThanOrderByStartTimeAsc(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(1)).size(), 1);
+        Assert.assertEquals(eventRepository.findByStartTimeLessThanOrderByStartTimeAsc(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).minusDays(1)).size(), 0);
+        Assert.assertEquals(eventRepository.findByStartTimeLessThanOrderByStartTimeAsc(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(4)).size(), 6);
     }
 
     @Test

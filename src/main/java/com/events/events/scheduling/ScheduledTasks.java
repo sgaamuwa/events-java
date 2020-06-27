@@ -20,7 +20,7 @@ public class ScheduledTasks {
     @Scheduled(cron = "0 0 0 * * ?")
     public void scheduleClosingEventsDayBefore(){
         // close every event that is 24 hours away
-        List<Event> events = eventRepository.findByStartTime(LocalDateTime.now().plusDays(1));
+        List<Event> events = eventRepository.findByStartTimeOrderByStartTimeAsc(LocalDateTime.now().plusDays(1));
         for (Event event : events){
             event.setEventStatus(EventStatus.CLOSED);
         }

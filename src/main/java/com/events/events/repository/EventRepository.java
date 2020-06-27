@@ -14,18 +14,18 @@ import java.util.List;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Integer>{
 
-    List<Event> findByStartTime(LocalDateTime date);
+    List<Event> findByStartTimeOrderByStartTimeAsc(LocalDateTime date);
 
     List<Event> findByEventStatus(EventStatus eventStatus);
 
-    @Query(value = "SELECT * FROM events e WHERE e.user_id IN :friends", nativeQuery = true)
+    @Query(value = "SELECT * FROM events e WHERE e.user_id IN :friends ORDER BY start_time ASC ", nativeQuery = true)
     List<Event> findAllEventsByFriends(@Param("friends") List<Integer> friends);
 
 
-    List<Event> findByStartTimeGreaterThan(LocalDateTime date);
+    List<Event> findByStartTimeGreaterThanOrderByStartTimeAsc(LocalDateTime date);
 
-    List<Event> findByStartTimeLessThan(LocalDateTime date);
+    List<Event> findByStartTimeLessThanOrderByStartTimeAsc(LocalDateTime date);
 
-    List<Event> findByStartTimeBetween(LocalDateTime dateFrom, LocalDateTime dateTo);
+    List<Event> findByStartTimeBetweenOrderByStartTimeAsc(LocalDateTime dateFrom, LocalDateTime dateTo);
 
 }
