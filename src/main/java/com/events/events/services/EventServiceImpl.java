@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -292,7 +291,7 @@ public class EventServiceImpl implements EventService {
     public List<Event> getEventsByDate(LocalDateTime date) {
         LOGGER.info(String.format("Get events by date: %s started", date.toString()));
 
-        List<Event> events = eventRepository.findByStartTime(date);
+        List<Event> events = eventRepository.findByStartTimeOrderByStartTimeAsc(date);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events for the date: "+ date);
         }
@@ -305,7 +304,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public List<Event> getEventsBetweenDates(LocalDateTime dateFrom, LocalDateTime dateTo) {
         LOGGER.info(String.format("Get events between date: %s and date: %s started", dateFrom.toString(), dateTo.toString()));
-        List<Event> events = eventRepository.findByStartTimeBetween(dateFrom, dateTo);
+        List<Event> events = eventRepository.findByStartTimeBetweenOrderByStartTimeAsc(dateFrom, dateTo);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events for between the dates: "+ dateFrom + " and "+ dateTo);
         }
@@ -317,7 +316,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public List<Event> getEventsAfterDate(LocalDateTime date) {
         LOGGER.info(String.format("Get events after date: %s started", date.toString()));
-        List<Event> events = eventRepository.findByStartTimeGreaterThan(date);
+        List<Event> events = eventRepository.findByStartTimeGreaterThanOrderByStartTimeAsc(date);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events after the date: "+ date);
         }
@@ -329,7 +328,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public List<Event> getEventsBeforeDate(LocalDateTime date) {
         LOGGER.info(String.format("Get events before date: %s started", date.toString()));
-        List<Event> events = eventRepository.findByStartTimeLessThan(date);
+        List<Event> events = eventRepository.findByStartTimeLessThanOrderByStartTimeAsc(date);
         if(events.isEmpty()){
             throw new EmptyListException("There are no available events before the date: "+ date);
         }
