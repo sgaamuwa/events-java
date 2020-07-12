@@ -49,7 +49,7 @@ public class UserEventIntegrationTests extends BaseIntegrationTest{
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$[0].title", is("Snockling")))
                 .andExpect(jsonPath("$[1].title", is("Bungee Jumping")));
     }
@@ -150,5 +150,42 @@ public class UserEventIntegrationTests extends BaseIntegrationTest{
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].eventId", is(91)))
                 .andExpect(jsonPath("$[1].eventId", is(92)));
+    }
+
+    @Test
+    @WithMockUser(username = "samuelgaamuwa")
+    public void testCanDeleteInviteeFromEvent() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders
+                .delete("/v1/users/91/events/99/invites/92")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.invitees", hasSize(1)))
+                .andExpect(jsonPath("$.invitees[0].userId", is(93)));
+    }
+
+    @Test
+    @WithMockUser(username = "jbawaya")
+    public void testCantDeleteInviteeIfLoggedInUserNotCreatorOfEvent() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                .delete("/v1/users/91/events/99/invites/92")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
+                .andDo(print())
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("You do not have the required permission to complete this operation")));
+    }
+
+    @Test
+    @WithMockUser(username = "samuelgaamuwa")
+    public void testReturnsBadRequestIfInviteeIdIsNotInvited() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders
+                .delete("/v1/users/91/events/99/invites/95")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("User with id :95 is not invited to the event id: 99")));
     }
 }

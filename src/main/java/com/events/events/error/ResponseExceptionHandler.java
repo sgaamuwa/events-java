@@ -31,7 +31,7 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         return constructHandleException(e, request, HttpStatus.NOT_ACCEPTABLE);
     }
 
-    @ExceptionHandler(value = {ConstraintViolationException.class, InvalidDateException.class})
+    @ExceptionHandler(value = {ConstraintViolationException.class, InvalidDateException.class, BadRequestException.class})
     protected ResponseEntity<Object> handleConstraintViolationException(RuntimeException e, WebRequest request){
         return constructHandleException(e, request, HttpStatus.BAD_REQUEST);
     }
@@ -50,6 +50,8 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleAuthorisationException(RuntimeException  e, WebRequest request){
         return constructHandleException(e, request, HttpStatus.UNAUTHORIZED);
     }
+
+
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request){

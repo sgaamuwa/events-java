@@ -14,6 +14,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import sun.rmi.runtime.Log;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -264,6 +265,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public Event addInviteesToEvent(int userId, int eventId, int[] inviteesList) {
         LOGGER.info("Adding invitees to event id: "+ eventId);
         User user = verifyAndReturnUser(userId);
@@ -285,6 +287,33 @@ public class EventServiceImpl implements EventService {
         Set<User> eventInvitees = event.getInvitees();
         eventInvitees.addAll(invitees);
         event.setInvitees(eventInvitees);
+        return eventRepository.save(event);
+    }
+
+    @Override
+    @Transactional
+    public Event deleteInviteeFromEvent(int userId, int eventId, int inviteeId, String username) {
+        LOGGER.info("Deleting user id: "+inviteeId+ " from invites for event id: "+eventId);
+        User user = checkUserIdBelongsToCurrentUser(userId, username);
+        Event event = verifyAndReturnEvent(eventId);
+
+        if(!event.getCreator().equals(user)){
+            LOGGER.info("Adding invitees failed");
+            LOGGER.error("User does not have permission to add invitees to the event");
+            throw new AuthorisationException("You do not have the required permission to complete this operation");
+        }
+
+        User invitee = verifyAndReturnUser(inviteeId);
+        //check if the invitee id is actually an invitee
+        if(!event.getInvitees().contains(invitee)){
+            LOGGER.error("Unable to deleted invitee: Invitee Id not part of event invitee list");
+            throw new BadRequestException("User with id :"+inviteeId+" is not invited to the event id: "+eventId);
+        }
+        //remove invitee
+        event.getInvitees().remove(invitee);
+        invitee.getInvites().remove(event);
+        LOGGER.info("Invitee deleted successfully");
+        userRepository.save(invitee);
         return eventRepository.save(event);
     }
 

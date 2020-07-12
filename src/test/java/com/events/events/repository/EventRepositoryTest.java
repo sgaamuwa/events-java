@@ -96,8 +96,8 @@ public class EventRepositoryTest {
         entityManager.persist(jumping);
         entityManager.persist(cinemaMovie);
 
-        Assert.assertEquals(eventRepository.findByStartTimeGreaterThanOrderByStartTimeAsc(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(1)).size(), 9);
-        Assert.assertEquals(eventRepository.findByStartTimeGreaterThanOrderByStartTimeAsc(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).minusDays(1)).size(), 11);
+        Assert.assertEquals(eventRepository.findByStartTimeGreaterThanOrderByStartTimeAsc(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusDays(1)).size(), 10);
+        Assert.assertEquals(eventRepository.findByStartTimeGreaterThanOrderByStartTimeAsc(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).minusDays(1)).size(), 12);
     }
 
     @Test
@@ -127,7 +127,7 @@ public class EventRepositoryTest {
         entityManager.persist(jumping);
         entityManager.persist(cinemaMovie);
 
-        Assert.assertEquals(eventRepository.findByEventStatus(EventStatus.OPEN).size(), 10);
+        Assert.assertEquals(eventRepository.findByEventStatus(EventStatus.OPEN).size(), 11);
         Assert.assertEquals(eventRepository.findByEventStatus(EventStatus.CANCELLED).size(), 1);
         Assert.assertEquals(eventRepository.findByEventStatus(EventStatus.CANCELLED).get(0), beach);
     }
@@ -146,7 +146,7 @@ public class EventRepositoryTest {
         entityManager.persist(nightDancing);
         entityManager.persist(quidditch);
 
-        Assert.assertEquals(eventRepository.findAll().size(), 13);
+        Assert.assertEquals(14, eventRepository.findAll().size());
         Assert.assertEquals(eventRepository.findAllEventsByFriends(Arrays.asList(samuel.getUserId(), male.getUserId())).size(), 4);
     }
 
