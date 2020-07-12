@@ -1,9 +1,6 @@
 package com.events.events.unit.service;
 
-import com.events.events.error.AuthorisationException;
-import com.events.events.error.DuplicateCreationException;
-import com.events.events.error.InvalidDateException;
-import com.events.events.error.NotFoundException;
+import com.events.events.error.*;
 import com.events.events.models.Event;
 import com.events.events.models.EventStatus;
 import com.events.events.models.Friend;
@@ -306,7 +303,7 @@ public class EventServiceImplTest {
     }
 
     @Test
-    public void textCantGetEventsIfFollowRequestWasNotAccepted(){
+    public void testCantGetEventsIfFollowRequestWasNotAccepted(){
         samuel.setUserId(1);
         male.setUserId(2);
 
@@ -331,5 +328,67 @@ public class EventServiceImplTest {
 
         Assert.assertEquals(eventService.getAllEventsForUser("username").size(), 1);
         Mockito.verify(eventRepository).findAllEventsByFriends(Arrays.asList(new Integer(1), new Integer(0)));
+    }
+
+    @Test
+    public void testCanDeleteInviteeFromEventIfInviteeIdIsValid(){
+        User user = Mockito.mock(User.class);
+        Set<User> invitees = new HashSet<>();
+        invitees.addAll(Arrays.asList(user, male));
+        beach.setInvitees(invitees);
+        male.setInvites(new ArrayList<>(Arrays.asList(beach)));
+
+        Mockito.when(userRepository.findById(3)).thenReturn(Optional.of(samuel));
+        Mockito.when(userRepository.findByUsername("sgaamuwa")).thenReturn(Optional.of(samuel));
+        Mockito.when(eventRepository.save(beach)).thenReturn(beach);
+        Mockito.when(userRepository.save(male)).thenReturn(male);
+
+        Event event = eventService.deleteInviteeFromEvent(3, 2, 1, "sgaamuwa");
+
+        Assert.assertEquals(1, event.getInvitees().size());
+        Assert.assertTrue(event.getInvitees().contains(user));
+
+    }
+
+    @Test
+    public void testCantDeleteInviteeIfTheyAreNotInvitedToEvent(){
+        User user = Mockito.mock(User.class);
+        Set<User> invitees = new HashSet<>();
+        invitees.addAll(Arrays.asList(user, male));
+        beach.setInvitees(invitees);
+        male.setInvites(new ArrayList<>(Arrays.asList(beach)));
+
+        Mockito.when(userRepository.findById(3)).thenReturn(Optional.of(samuel));
+        Mockito.when(userRepository.findByUsername("sgaamuwa")).thenReturn(Optional.of(samuel));
+        Mockito.when(eventRepository.save(beach)).thenReturn(beach);
+        Mockito.when(userRepository.save(male)).thenReturn(male);
+
+        Throwable exception = assertThrows(BadRequestException.class, () -> {
+            eventService.deleteInviteeFromEvent(3, 2, 2, "sgaamuwa");
+        });
+
+        Assert.assertEquals("User with id :2 is not invited to the event id: 2", exception.getMessage());
+
+    }
+
+    @Test
+    public void testCantDeleteInviteeIfNotOwnerOfEvent(){
+        User user = Mockito.mock(User.class);
+        Set<User> invitees = new HashSet<>();
+        invitees.addAll(Arrays.asList(user, male));
+        beach.setInvitees(invitees);
+        male.setInvites(new ArrayList<>(Arrays.asList(beach)));
+
+        Mockito.when(userRepository.findById(3)).thenReturn(Optional.of(samuel));
+        Mockito.when(userRepository.findByUsername("sgaamuwa")).thenReturn(Optional.of(samuel));
+        Mockito.when(eventRepository.save(beach)).thenReturn(beach);
+        Mockito.when(userRepository.save(male)).thenReturn(male);
+
+        Throwable exception = assertThrows(AuthorisationException.class, () -> {
+            eventService.deleteInviteeFromEvent(2, 2, 1, "sgaamuwa");
+        });
+
+        Assert.assertEquals("You do not have the required permission to complete this operation", exception.getMessage());
+
     }
 }

@@ -126,6 +126,16 @@ public interface EventService {
     Event addInviteesToEvent(int userId, int eventId, int[] invitees);
 
     /**
+     * This method deletes an invitee from an event
+     * @param userId
+     * @param eventId
+     * @param inviteeId
+     * @return
+     */
+    @PreAuthorize("#username == authentication.principal.username")
+    Event deleteInviteeFromEvent(int userId, int eventId, int inviteeId, String username);
+
+    /**
      * This is a method that returns all events happening on a given date
      * @param date
      * @return List

@@ -29,6 +29,9 @@ INSERT INTO events (event_id, created_at, start_time, end_time, event_status, lo
     VALUES(97, current_date, (NOW() + interval '6 day'), (NOW() + interval '6day 2 hours'), 0, 'Capetown', 'Concert', current_date, 96);
 INSERT INTO events (event_id, created_at, start_time, end_time, event_status, location, title, updated_at, user_id)
     VALUES(98, current_date, (NOW() + interval '10 day'), (NOW() + interval '10 day 2 hours'), 0, 'Oakland', 'Migration', current_date, 93);
+INSERT INTO events (event_id, created_at, start_time, end_time, event_status, location, title, updated_at, user_id)
+    VALUES(99, current_date, (NOW() + interval '11 day'), (NOW() + interval '11 day 2 hours'), 0, 'Nicaragua', 'Baecation', current_date, 91);
+
 
 INSERT INTO user_event_attending (user_id, event_id)
     VALUES(91,91);
@@ -49,6 +52,10 @@ INSERT INTO user_event_invites (user_id, event_id)
     VALUES(91, 93);
 INSERT INTO user_event_invites (user_id, event_id)
     VALUES(91, 94);
+INSERT INTO user_event_invites (user_id, event_id)
+    VALUES(93, 99);
+INSERT INTO user_event_invites (user_id, event_id)
+    VALUES(92, 99);
 
 INSERT INTO friends (created_at, is_active, updated_at, owner_user_id, friend_user_id)
     VALUES(current_date, true, current_date, 91, 92);

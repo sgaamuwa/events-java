@@ -61,9 +61,14 @@ public class UserEventsController {
         return new ResponseEntity<>(eventService.downloadEventImage(eventId, id), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{eventId}/invites")
+    @RequestMapping(value = "/{eventId}/invites", method = RequestMethod.POST)
     public Event postInvitesForEvent(@PathVariable("id") int id, @PathVariable("eventId") int eventId, @RequestBody Map<String, int[]> payload){
         return addHateoasLinksToEvent(eventService.addInviteesToEvent(id, eventId, payload.get("invitees")), id);
+    }
+
+    @RequestMapping(value = "/{eventId}/invites/{inviteeId}", method = RequestMethod.DELETE)
+    public Event deleteInvitesForEvent(@PathVariable("id") int id, @PathVariable("eventId") int eventId, @PathVariable("inviteeId") int inviteeId, Principal principal){
+        return addHateoasLinksToEvent(eventService.deleteInviteeFromEvent(id, eventId, inviteeId, principal.getName()), id);
     }
 
     @RequestMapping(value = "/attending", method = RequestMethod.GET)
