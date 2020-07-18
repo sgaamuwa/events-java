@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserService extends UserDetailsService {
 
@@ -102,6 +103,16 @@ public interface UserService extends UserDetailsService {
      * @return
      */
     List<User> searchUsers(String searchTerm);
+
+    /**
+     * This method returns the connections between the user and the user id they provide
+     * Connections include, followed, followedBy, pendingRequest
+     * @param userIds
+     * @param username
+     * @return
+     */
+    @PreAuthorize("#username == authentication.principal.username")
+    List<Map<String, Object>> userConnections(int[] userIds, String username);
 
     /**
      * This method that accepts a follow request from the user with the given id

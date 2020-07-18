@@ -83,6 +83,11 @@ public class UserController {
         return new ResponseEntity<>("You have stopped follow user with userId: "+id, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/{id}/friendships/lookup", method = RequestMethod.POST)
+    public List<Map<String, Object>> getUserConnections(@PathVariable int id, @RequestBody Map<String, int[]> payload, Principal principal){
+        return userService.userConnections(payload.get("ids"), principal.getName());
+    }
+
     @RequestMapping(value = "/search", params = {"q"}, method = RequestMethod.GET)
     public List<User> searchUsers(@RequestParam("q") String searchTerm){
         return userService.searchUsers(searchTerm);
