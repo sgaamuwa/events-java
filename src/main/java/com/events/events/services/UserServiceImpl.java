@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -222,6 +223,47 @@ public class UserServiceImpl implements UserService {
         }
         LOGGER.info("Searching for user: "+ searchTerm + " completed");
         return users;
+    }
+
+    @Override
+    public List<Map<String, Object>> userConnections(int[] userIds, String username) {
+        LOGGER.info("Generating user connections");
+        User currentUser = verifyAndReturnUser(username);
+        List<User> searchedUsers = userRepository.findAllById(Arrays.stream(userIds).boxed().collect(Collectors.toList()));
+
+        if(searchedUsers.isEmpty()){
+            LOGGER.error("Ids provided do not exist");
+            throw new BadRequestException("UserIDs provided do not match any in the system");
+        }
+
+        List<Map<String, Object>> userConnections = new ArrayList<>();
+
+        for(User user : searchedUsers){
+            Map<String, Object> userMap = new HashMap<>();
+            List<String> connections = new ArrayList<>();
+            userMap.put("id", user.getUserId());
+            // check if the user is following them and it is active
+            if(currentUser.getFriends().contains(new Friend(currentUser, user)) && friendRepository.findById(new Friend.Key(currentUser, user)).get().isActive()){
+                connections.add("following");
+            }
+            // check if the user is following them and it is not yet active
+            if(currentUser.getFriends().contains(new Friend(currentUser, user)) && !friendRepository.findById(new Friend.Key(currentUser, user)).get().isActive()){
+                connections.add("requestedFollow");
+            }
+            // check if they are following the user and it is active
+            if(user.getFriends().contains(new Friend(user, currentUser)) && friendRepository.findById(new Friend.Key(user, currentUser)).get().isActive()){
+                connections.add("followedBy");
+            }
+            // check if they are following the user and it is not yet active
+            if(user.getFriends().contains(new Friend(user, currentUser)) && !friendRepository.findById(new Friend.Key(user, currentUser)).get().isActive()){
+                connections.add("pendingRequest");
+            }
+
+            userMap.put("connections", connections);
+            userConnections.add(userMap);
+        }
+
+        return userConnections;
     }
 
     @Override

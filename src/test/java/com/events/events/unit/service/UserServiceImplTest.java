@@ -336,5 +336,67 @@ public class UserServiceImplTest {
         Assert.assertEquals("There are no users who fit the search term: aamu", exception.getMessage());
     }
 
+    @Test
+    public void testCanGetConnectionsForUser(){
+        List<Integer> users = new ArrayList<>(Arrays.asList(1, 2, 3, 4));
+        User user1 = Mockito.mock(User.class);
+        User user2 = Mockito.mock(User.class);
+        User user3 = Mockito.mock(User.class);
+        User user4 = Mockito.mock(User.class);
+        Friend friend1 = new Friend(samuel, user1);
+        friend1.setActive(true);
+        Friend friend2 = new Friend(user1, samuel);
+        friend2.setActive(true);
+        Friend friend3 = new Friend(user2, samuel);
+        friend3.setActive(true);
+        Friend friend4 = new Friend(user3, samuel);
+        Friend friend5 = new Friend(samuel, user4);
+
+        Mockito.when(user1.getUserId()).thenReturn(6);
+        Mockito.when(user2.getUserId()).thenReturn(7);
+        Mockito.when(user3.getUserId()).thenReturn(8);
+        Mockito.when(user4.getUserId()).thenReturn(9);
+
+        samuel.setFriends(new HashSet<>(Arrays.asList(friend1, friend5)));
+        Mockito.when(user1.getFriends()).thenReturn(new HashSet<>(Arrays.asList(friend2)));
+        Mockito.when(user2.getFriends()).thenReturn(new HashSet<>(Arrays.asList(friend3)));
+        Mockito.when(user3.getFriends()).thenReturn(new HashSet<>(Arrays.asList(friend4)));
+        Mockito.when(user4.getFriends()).thenReturn(new HashSet<>());
+
+        Mockito.when(userRepository.findAllById(users)).thenReturn(Arrays.asList(user1, user2, user3, user4));
+        Mockito.when(friendRepository.findById(new Friend.Key(samuel, user1))).thenReturn(Optional.of(friend1));
+        Mockito.when(friendRepository.findById(new Friend.Key(user1, samuel))).thenReturn(Optional.of(friend2));
+        Mockito.when(friendRepository.findById(new Friend.Key(samuel, user2))).thenReturn(Optional.empty());
+        Mockito.when(friendRepository.findById(new Friend.Key(user2, samuel))).thenReturn(Optional.of(friend3));
+        Mockito.when(friendRepository.findById(new Friend.Key(samuel, user3))).thenReturn(Optional.empty());
+        Mockito.when(friendRepository.findById(new Friend.Key(user3, samuel))).thenReturn(Optional.of(friend4));
+        Mockito.when(friendRepository.findById(new Friend.Key(samuel, user4))).thenReturn(Optional.of(friend5));
+        Mockito.when(friendRepository.findById(new Friend.Key(user4, samuel))).thenReturn(Optional.empty());
+
+        List<Map<String, Object>> returnedList = userService.userConnections(new int[]{1,2,3,4}, "sgaamuwa");
+
+        Assert.assertTrue(returnedList.size() == 4);
+        Assert.assertTrue(((Integer) returnedList.get(0).get("id")).equals(6));
+        Assert.assertTrue(((Integer) returnedList.get(1).get("id")).equals(7));
+        Assert.assertTrue(((Integer) returnedList.get(2).get("id")).equals(8));
+        Assert.assertTrue(((Integer) returnedList.get(3).get("id")).equals(9));
+        Assert.assertTrue(((List<String>)returnedList.get(0).get("connections")).containsAll(Arrays.asList("following", "followedBy")));
+        Assert.assertTrue(((List<String>)returnedList.get(1).get("connections")).containsAll(Arrays.asList("followedBy")));
+        Assert.assertTrue(((List<String>)returnedList.get(2).get("connections")).containsAll(Arrays.asList("pendingRequest")));
+        Assert.assertTrue(((List<String>)returnedList.get(3).get("connections")).containsAll(Arrays.asList("requestedFollow")));
+    }
+
+    @Test
+    public void testReturnsExceptionIfUserIdsDoNotExist(){
+        List<Integer> users = new ArrayList<>(Arrays.asList(1, 2, 3, 4));
+        Mockito.when(userRepository.findAllById(users)).thenReturn(Collections.emptyList());
+
+        Throwable exception = assertThrows(BadRequestException.class, () -> {
+            userService.userConnections(new int[]{1,2,3,4}, "sgaamuwa");;
+        });
+
+        Assert.assertTrue(exception.getMessage().equals("UserIDs provided do not match any in the system"));
+    }
+
 
 }

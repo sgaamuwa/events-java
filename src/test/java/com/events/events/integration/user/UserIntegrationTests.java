@@ -135,5 +135,44 @@ public class UserIntegrationTests extends BaseIntegrationTest{
     }
 
 
+    @Test
+    @WithMockUser(username = "samuelgaamuwa")
+    public void testReturnsConnectionsForUserListProvided() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/v1/users/91/friendships/lookup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\n" +
+                        "\t\"ids\": [92, 93, 94]\n" +
+                        "}"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0].id", is(92)))
+                .andExpect(jsonPath("$[0].connections", hasSize(2)))
+                .andExpect(jsonPath("$[0].connections", contains("following", "followedBy")))
+                .andExpect(jsonPath("$[1].id", is(93)))
+                .andExpect(jsonPath("$[1].connections", hasSize(2)))
+                .andExpect(jsonPath("$[1].connections", contains("requestedFollow", "followedBy")))
+                .andExpect(jsonPath("$[2].id", is(94)))
+                .andExpect(jsonPath("$[2].connections", hasSize(0)));
+
+    }
+
+    @Test
+    @WithMockUser(username = "samuelgaamuwa")
+    public void testReturnsBadRequestIfUserIdsDoNotExist() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/v1/users/91/friendships/lookup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\n" +
+                        "\t\"ids\": [61, 62, 63]\n" +
+                        "}"))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is("BAD_REQUEST")))
+                .andExpect(jsonPath("$.message", is("UserIDs provided do not match any in the system")));
+    }
+
+
 
 }
