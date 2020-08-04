@@ -85,6 +85,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         }
 
         response.addHeader("content-type", "application/json");
+        response.setStatus(401);
         Map<String, String> responseBody = new HashMap<>();
         responseBody.put("status", HttpStatus.UNAUTHORIZED.toString());
         responseBody.put("message", failed.getMessage());
