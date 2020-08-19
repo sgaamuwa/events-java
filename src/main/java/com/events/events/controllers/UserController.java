@@ -85,7 +85,7 @@ public class UserController {
 
     @RequestMapping(value = "/{id}/friendships/lookup", method = RequestMethod.POST)
     public List<Map<String, Object>> getUserConnections(@PathVariable int id, @RequestBody Map<String, int[]> payload, Principal principal){
-        return userService.userConnections(payload.get("ids"), principal.getName());
+        return userService.userConnections(payload.get("ids"), id, principal.getName());
     }
 
     @RequestMapping(value = "/search", params = {"q"}, method = RequestMethod.GET)
