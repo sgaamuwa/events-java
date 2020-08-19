@@ -72,7 +72,6 @@ public interface UserService extends UserDetailsService {
      * @param newPassword
      * @param username
      */
-    @PreAuthorize("#username == authentication.principal.username")
     void changePassword(String oldPassword, String newPassword, String username);
 
     /**
@@ -81,7 +80,6 @@ public interface UserService extends UserDetailsService {
      * @param friendId
      * @param username
      */
-    @PreAuthorize("#username == authentication.principal.username")
     void addFriend(int userId, int friendId, String username);
 
     /**
@@ -111,8 +109,7 @@ public interface UserService extends UserDetailsService {
      * @param username
      * @return
      */
-    @PreAuthorize("#username == authentication.principal.username")
-    List<Map<String, Object>> userConnections(int[] userIds, String username);
+    List<Map<String, Object>> userConnections(int[] userIds, int userId, String username);
 
     /**
      * This method that accepts a follow request from the user with the given id
@@ -120,7 +117,6 @@ public interface UserService extends UserDetailsService {
      * @param followerId
      * @param username
      */
-    @PreAuthorize("#username == authentication.principal.username")
     void acceptFollowRequest(int userId, int followerId, String username);
 
     /**
@@ -129,7 +125,6 @@ public interface UserService extends UserDetailsService {
      * @param followerId
      * @param username
      */
-    @PreAuthorize("#username == authentication.principal.username")
     void rejectFollowRequest(int userId, int followerId, String username);
 
     /**
@@ -138,7 +133,6 @@ public interface UserService extends UserDetailsService {
      * @param friendId
      * @param username
      */
-    @PreAuthorize("#username == authentication.principal.username")
     void unFollowUser(int userId, int friendId, String username);
 
     /**

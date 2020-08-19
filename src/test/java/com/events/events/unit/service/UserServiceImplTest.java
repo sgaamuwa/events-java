@@ -373,7 +373,7 @@ public class UserServiceImplTest {
         Mockito.when(friendRepository.findById(new Friend.Key(samuel, user4))).thenReturn(Optional.of(friend5));
         Mockito.when(friendRepository.findById(new Friend.Key(user4, samuel))).thenReturn(Optional.empty());
 
-        List<Map<String, Object>> returnedList = userService.userConnections(new int[]{1,2,3,4}, "sgaamuwa");
+        List<Map<String, Object>> returnedList = userService.userConnections(new int[]{1,2,3,4}, 1, "sgaamuwa");
 
         Assert.assertTrue(returnedList.size() == 4);
         Assert.assertTrue(((Integer) returnedList.get(0).get("id")).equals(6));
@@ -392,7 +392,7 @@ public class UserServiceImplTest {
         Mockito.when(userRepository.findAllById(users)).thenReturn(Collections.emptyList());
 
         Throwable exception = assertThrows(BadRequestException.class, () -> {
-            userService.userConnections(new int[]{1,2,3,4}, "sgaamuwa");;
+            userService.userConnections(new int[]{1,2,3,4}, 1,"sgaamuwa");;
         });
 
         Assert.assertTrue(exception.getMessage().equals("UserIDs provided do not match any in the system"));

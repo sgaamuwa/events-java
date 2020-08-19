@@ -226,9 +226,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<Map<String, Object>> userConnections(int[] userIds, String username) {
+    public List<Map<String, Object>> userConnections(int[] userIds, int userId, String username) {
         LOGGER.info("Generating user connections");
-        User currentUser = verifyAndReturnUser(username);
+        User currentUser = verifyAndReturnUser(userId);
+        // check that the user returned is the same user accessing the system
+        if(!currentUser.getUsername().equals(username)){
+            throw new AuthorisationException("You do not have the required permission to complete this operation");
+        }
         List<User> searchedUsers = userRepository.findAllById(Arrays.stream(userIds).boxed().collect(Collectors.toList()));
 
         if(searchedUsers.isEmpty()){
